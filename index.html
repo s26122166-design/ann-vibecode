@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Y2K CYBERPORT // 網頁程式設計作品集</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Orbitron & Share Tech Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            cyberMagenta: '#ff007f',
+            cyberCyan: '#00f3ff',
+            cyberGreen: '#00ff66',
+            cyberYellow: '#ffe600',
+            cyberDark: '#0a0a12',
+            cyberCard: '#121324',
+            cyberBorder: '#2a2d52',
+            chromeLight: '#e0e7ff',
+          },
+          fontFamily: {
+            orbitron: ['Orbitron', 'sans-serif'],
+            mono: ['Share Tech Mono', 'monospace'],
+            sans: ['Noto Sans TC', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    :root {
+      --neon-cyan: #00f3ff;
+      --neon-magenta: #ff007f;
+      --neon-green: #00ff66;
+    }
+
+    body {
+      background-color: #07070e;
+      color: #e0e7ff;
+      font-family: 'Noto Sans TC', 'Share Tech Mono', sans-serif;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 50% 20%, rgba(255, 0, 127, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(0, 243, 255, 0.1) 0%, transparent 40%);
+    }
+
+    /* Y2K Animated Cyber Grid Background */
+    .cyber-grid-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-size: 40px 40px;
+      background-image: 
+        linear-gradient(to right, rgba(0, 243, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 243, 255, 0.05) 1px, transparent 1px);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .cyber-grid-perspective {
+      position: fixed;
+      bottom: -30%;
+      left: -50%;
+      width: 200%;
+      height: 100%;
+      background-image: 
+        linear-gradient(rgba(255, 0, 127, 0.12) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 243, 255, 0.12) 1px, transparent 1px);
+      background-size: 50px 50px;
+      transform: perspective(500px) rotateX(60deg);
+      animation: gridMove 12s linear infinite;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    @keyframes gridMove {
+      0% { background-position: 0 0; }
+      100% { background-position: 0 50px; }
+    }
+
+    /* CRT Scanlines Overlay Effect */
+    .scanlines {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        rgba(18, 16, 16, 0) 50%, 
+        rgba(0, 0, 0, 0.25) 50%
+      );
+      background-size: 100% 4px;
+      z-index: 99;
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    /* Holographic Chrome Gradient Text */
+    .chrome-text {
+      background: linear-gradient(
+        180deg, 
+        #ffffff 0%, 
+        #c0c0c0 30%, 
+        #808080 45%, 
+        #00f3ff 50%, 
+        #ffffff 75%, 
+        #ff007f 100%
+      );
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 10px rgba(0, 243, 255, 0.4));
+    }
+
+    /* Glitch Animation Effect */
+    .glitch-effect {
+      position: relative;
+      display: inline-block;
+    }
+
+    .glitch-effect::before,
+    .glitch-effect::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.8;
+    }
+
+    .glitch-effect::before {
+      left: 2px;
+      text-shadow: -2px 0 #ff007f;
+      clip: rect(24px, 550px, 90px, 0);
+      animation: glitch-anim 3s infinite linear alternate-reverse;
+    }
+
+    .glitch-effect::after {
+      left: -2px;
+      text-shadow: -2px 0 #00f3ff;
+      clip: rect(85px, 550px, 140px, 0);
+      animation: glitch-anim2 2.5s infinite linear alternate-reverse;
+    }
+
+    @keyframes glitch-anim {
+      0% { clip: rect(12px, 9999px, 52px, 0); transform: skew(0.3deg); }
+      20% { clip: rect(65px, 9999px, 88px, 0); transform: skew(0.8deg); }
+      40% { clip: rect(32px, 9999px, 15px, 0); transform: skew(0.1deg); }
+      60% { clip: rect(80px, 9999px, 95px, 0); transform: skew(0.5deg); }
+      80% { clip: rect(20px, 9999px, 40px, 0); transform: skew(0.2deg); }
+      100% { clip: rect(50px, 9999px, 70px, 0); transform: skew(0.6deg); }
+    }
+
+    @keyframes glitch-anim2 {
+      0% { clip: rect(70px, 9999px, 20px, 0); }
+      20% { clip: rect(10px, 9999px, 80px, 0); }
+      40% { clip: rect(50px, 9999px, 30px, 0); }
+      60% { clip: rect(90px, 9999px, 10px, 0); }
+      80% { clip: rect(30px, 9999px, 60px, 0); }
+      100% { clip: rect(15px, 9999px, 85px, 0); }
+    }
+
+    /* Holographic Avatar Border Frame */
+    .avatar-holo-frame {
+      position: relative;
+      border-radius: 9999px;
+      padding: 6px;
+      background: linear-gradient(135deg, #00f3ff, #ff007f, #00ff66, #00f3ff);
+      background-size: 300% 300%;
+      animation: holoShift 4s ease infinite;
+      box-shadow: 
+        0 0 25px rgba(0, 243, 255, 0.6),
+        0 0 45px rgba(255, 0, 127, 0.4),
+        inset 0 0 15px rgba(0, 243, 255, 0.5);
+    }
+
+    @keyframes holoShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Unlocked Stage Card Styling */
+    .card-unlocked {
+      background: linear-gradient(145deg, rgba(18, 19, 36, 0.9), rgba(10, 10, 22, 0.95));
+      border: 1px solid rgba(0, 243, 255, 0.5);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(0, 243, 255, 0.1);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .card-unlocked::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -150%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.25), 
+        rgba(0, 243, 255, 0.4), 
+        transparent
+      );
+      transform: skewX(-25deg);
+      transition: left 0.75s ease;
+    }
+
+    .card-unlocked:hover::before {
+      left: 150%;
+    }
+
+    .card-unlocked:hover {
+      transform: translateY(-8px) scale(1.03);
+      border-color: #00ff66;
+      box-shadow: 
+        0 12px 30px rgba(0, 255, 102, 0.3),
+        0 0 20px rgba(0, 243, 255, 0.5),
+        inset 0 0 15px rgba(0, 255, 102, 0.2);
+    }
+
+    /* Locked Stage Card Styling */
+    .card-locked {
+      background: linear-gradient(145deg, rgba(20, 20, 30, 0.6), rgba(10, 10, 15, 0.8));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      opacity: 0.65;
+      position: relative;
+      transition: all 0.25s ease;
+      cursor: not-allowed;
+    }
+
+    .card-locked:hover {
+      opacity: 0.95;
+      border-color: rgba(255, 0, 127, 0.6);
+      box-shadow: 0 0 20px rgba(255, 0, 127, 0.3);
+      animation: lockShake 0.4s ease-in-out;
+    }
+
+    @keyframes lockShake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-6px) rotate(-1deg); }
+      40% { transform: translateX(6px) rotate(1deg); }
+      60% { transform: translateX(-4px); }
+      80%
