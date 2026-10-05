@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚡ Y2K PORTFOLIO HUB // WEB QUEST 2000 ⚡</title>
+    <!-- Google Fonts: VT323, Press Start 2P, Noto Sans TC -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS for Utility layout -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        :root {
+            --neon-pink: #ff007f;
+            --neon-cyan: #00f0ff;
+            --neon-green: #00ff66;
+            --neon-yellow: #ffe600;
+            --bg-dark: #0a0518;
+            --card-dark: rgba(20, 10, 35, 0.85);
+            --locked-gray: #2d2b38;
+            --chrome-border: linear-gradient(135deg, #ffffff 0%, #a6a6a6 50%, #ffffff 75%, #3a3a3a 100%);
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: #ffffff;
+            font-family: 'Noto Sans TC', 'VT323', sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            overflow-x: hidden;
+            /* Cyber grid background */
+            background-image: 
+                linear-gradient(rgba(0, 240, 255, 0.08) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 240, 255, 0.08) 1px, transparent 1px);
+            background-size: 30px 30px;
+            background-position: center center;
+        }
+
+        .crt-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(
+                rgba(18, 16, 16, 0) 50%, 
+                rgba(0, 0, 0, 0.25) 50%
+            ), linear-gradient(
+                90deg,
+                rgba(255, 0, 0, 0.03),
+                rgba(0, 255, 0, 0.01),
+                rgba(0, 0, 255, 0.03)
+            );
+            background-size: 100% 3px, 6px 100%;
+            pointer-events: none;
+            z-index: 999;
+            opacity: 0.85;
+            transition: opacity 0.3s ease;
+        }
+
+        .pixel-font {
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        .vt-font {
+            font-family: 'VT323', monospace;
+        }
+
+        .y2k-window {
+            background: var(--card-dark);
+            border: 2px solid var(--neon-cyan);
+            box-shadow: 
+                0 0 20px rgba(0, 240, 255, 0.3),
+                inset 0 0 15px rgba(0, 240, 255, 0.15),
+                8px 8px 0px rgba(255, 0, 127, 0.5);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .y2k-window-header {
+            background: linear-gradient(90deg, #00f0ff 0%, #ff007f 100%);
+            padding: 6px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            color: #000;
+        }
+
+        /* Floating stickers decoration */
+        .floating-sticker {
+            position: absolute;
+            pointer-events: none;
+            animation: floatAnim 4s ease-in-out infinite alternate;
+            z-index: 10;
+            filter: drop-shadow(0 0 8px rgba(255,255,255,0.6));
+        }
+
+        @keyframes floatAnim {
+            0% { transform: translateY(0px) rotate(0deg); }
+            100% { transform: translateY(-12px) rotate(8deg); }
+        }
+
+        .avatar-container {
+            position: relative;
+            width: 130px;
+            height: 130px;
+            margin: 0 auto;
+        }
+
+        .avatar-frame {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            padding: 5px;
+            background: linear-gradient(45deg, var(--neon-cyan), var(--neon-pink), var(--neon-green), var(--neon-yellow));
+            background-size: 300% 300%;
+            animation: rotateGradient 4s linear infinite;
+            box-shadow: 0 0 25px rgba(255, 0, 127, 0.6);
+        }
+
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #0a0518;
+            background-color: #1a0f35;
+        }
+
+        @keyframes rotateGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .quest-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+        }
+
+        @media (max-width: 1024px) {
+            .quest-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 550px) {
+            .quest-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Unlocked Card Style */
+        .quest-card {
+            background: linear-gradient(145deg, rgba(25, 15, 45, 0.9), rgba(10, 5, 25, 0.95));
+            border: 2px solid var(--neon-cyan);
+            border-radius: 12px;
+            padding: 16px;
+            position: relative;
+            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-decoration: none;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 130px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(0, 240, 255, 0.1);
+            overflow: hidden;
+        }
+
+        .quest-card::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent,
+                rgba(255, 255, 255, 0.15),
+                transparent
+            );
+            transform: rotate(45deg) translateY(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .quest-card:hover::before {
+            transform: rotate(45deg) translateY(100%);
+        }
+
+        .quest-card.unlocked:hover {
+            transform: translateY(-6px) scale(1.02);
+            border-color: var(--neon-pink);
+            box-shadow: 
+                0 0 25px rgba(255, 0, 127, 0.6),
+                0 10px 20px rgba(0, 0, 0, 0.8),
+                inset 0 0 15px rgba(255, 0, 127, 0.3);
+        }
+
+        .quest-card.unlocked:active {
+            transform: translateY(-2px) scale(0.99);
+        }
+
+        .quest-card.locked {
+            background: linear-gradient(145deg, rgba(30, 30, 40, 0.8), rgba(15, 15, 20, 0.9));
+            border: 2px dashed #4a4a60;
+            color: #7a7a95;
+            cursor: not-allowed;
+            filter: grayscale(0.8);
+            opacity: 0.75;
+        }
+
+        .quest-card.locked:hover {
+            animation: lockedShake 0.4s ease-in-out;
+            border-color: #ff3344;
+            box-shadow: 0 0 15px rgba(255, 51, 68, 0.4);
+            color: #b0b0c5;
+        }
+
+        @keyframes lockedShake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-6px) rotate(-1deg); }
+            40% { transform: translateX(6px) rotate(1deg); }
+            60% { transform: translateX(-4px); }
+            80% { transform: translateX(4px); }
+        }
+
+        /* Badge Pills */
+        .badge {
+            font-size: 10px;
+            padding: 3px 8px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 1px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .badge-unlocked {
+            background: var(--neon-cyan);
+            color: #000;
+            box-shadow: 0 0 10px var(--neon-cyan);
+        }
+
+        .badge-locked {
+            background: #2a2a3a;
+            color: #8888a0;
+            border: 1px solid #444455;
+        }
+
+        /* Marquee Bar */
+        .marquee-container {
+            background: #000;
+            border-top: 1px solid var(--neon-cyan);
+            border-bottom: 1px solid var(--neon-cyan);
+            color: var(--neon-yellow);
+            overflow: hidden;
+            white-space: nowrap;
+            padding: 6px 0;
+            font-size: 14px;
+        }
+
+        .marquee-content {
+            display: inline-block;
+            animation: marquee 22s linear infinite;
+        }
+
+        @keyframes marquee {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        /* Custom Toast Notification */
+        #toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(255, 0, 60, 0.95);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: 2px solid #ffffff;
+            box-shadow: 0 0 20px rgba(255, 0, 60, 0.8);
+            font-weight: bold;
+            z-index: 1000;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center p-3 sm:p-6">
+
+    <div id="crtOverlay" class="crt-overlay"></div>
+
+    <!-- Floating Y2K Visual Aesthetics -->
+    <div class="floating-sticker text-3xl sm:text-4xl" style="top: 5%; left: 3%;">💿</div>
+    <div class="floating-sticker text-2xl sm:text-3xl" style="top: 12%; right: 4%; animation-delay: -1.5s;">✦</div>
+    <div class="floating-sticker text-3xl sm:text-4xl" style="bottom: 8%; left: 5%; animation-delay: -2s;">👾</div>
+    <div class="floating-sticker text-3xl sm:text-4xl" style="bottom: 10%; right: 5%; animation-delay: -0.8s;">⚡</div>
+
+    <main class="w-full max-w-5xl y2k-window my-4">
+        <!-- Window Titlebar -->
+        <div class="y2k-window-header vt-font text-lg tracking-wider">
+            <div class="flex items-center gap-2">
+                <span class="text-xl">🌐</span>
+                <span>CYBER_PORTFOLIO_SYSTEM_2000.EXE</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <button id="soundToggle" onclick="toggleSound()" class="px-2 py-0.5 bg-black text-xs text-cyan-300 border border-cyan-400 hover:bg-cyan-400 hover:text-black transition">
+                    🔊 SOUND: ON
+                </button>
+                <button id="crtToggle" onclick="toggleCRT()" class="px-2 py-0.5 bg-black text-xs text-pink-300 border border-pink-400 hover:bg-pink-400 hover:text-black transition">
+                    📺 CRT: ON
+                </button>
+                <div class="flex gap-1 ml-2">
+                    <span class="w-3 h-3 rounded-full bg-yellow-400 inline-block"></span>
+                    <span class="w-3 h-3 rounded-full bg-green-400 inline-block"></span>
+                    <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Marquee Ticker -->
+        <div class="marquee-container vt-font text-lg">
+            <div class="marquee-content">
+                ★ WELCOME TO MY Y2K WEB DESIGN PORTFOLIO ★ CLEAR WEEKS TO UNLOCK NEW QUESTS ★ CURRENT LEVEL: 02 // SYSTEM STATUS: ONLINE ★ BEST VIEWED IN 1024x768 ★
+            </div>
+        </div>
+
+        <section class="p-6 sm:p-8 text-center flex flex-col items-center justify-center border-b border-cyan-900/60">
+            <!-- Profile Avatar -->
+            <div class="avatar-container mb-4">
+                <div class="avatar-frame">
+                    <!-- Default SVG Y2K Pixel Avatar -->
+                    <img src="https://api.dicebear.com/7.x/pixel-art/svg?seed=Y2KMaster&backgroundColor=0a0518" 
+                         alt="User Avatar" 
+                         class="avatar-img"
+                         onerror="this.src='https://placehold.co/150x150/ff007f/fff?text=Y2K+ME'">
+                </div>
+                <div class="absolute -bottom-2 -right-2 bg-black border border-green-400 text-green-400 text-[10px] px-2 py-0.5 rounded-full pixel-font flex items-center gap-1 shadow-md">
+                    <span class="w-2 h-2 rounded-full bg-green-400 animate-ping"></span> ONLINE
+                </div>
+            </div>
+
+            <!-- Profile Title & Status -->
+            <h1 class="text-2xl sm:text-4xl font-extrabold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-pink-500 to-yellow-300 drop-shadow-[0_2px_10px_rgba(0,240,255,0.8)] mb-2">
+                ⚡ 網頁設計戰隊 - USER PORTFOLIO ⚡
+            </h1>
+            <p class="text-gray-300 vt-font text-xl sm:text-2xl tracking-widest max-w-xl">
+                [ LV.99 WEB DEVELOPER ] // WEEKLY QUEST PORTAL
+            </p>
+
+            <!-- Retro Status Chips -->
+            <div class="flex flex-wrap justify-center gap-3 mt-4 text-xs pixel-font">
+                <span class="px-3 py-1 bg-purple-950/80 border border-purple-500/50 rounded text-pink-300">
+                    CLASS: FRONTEND HERO
+                </span>
+                <span class="px-3 py-1 bg-cyan-950/80 border border-cyan-500/50 rounded text-cyan-300">
+                    COMPLETED: 2 / 16
+                </span>
+                <span class="px-3 py-1 bg-yellow-950/80 border border-yellow-500/50 rounded text-yellow-300">
+                    XP: 1250 / 9999
+                </span>
+            </div>
+        </section>
+
+        <section class="p-6 sm:p-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl sm:text-2xl font-bold tracking-wide flex items-center gap-2 text-cyan-300 vt-font text-2xl">
+                    <span>🎮</span> SELECT QUEST LEVEL (16 WEEKS)
+                </h2>
+                <span class="text-xs text-gray-400 vt-font text-base">CLICK UNLOCKED CARDS TO ENTER</span>
+            </div>
+
+            <!-- 16 Quest Grid Container -->
+            <div class="quest-grid">
+                
+                <!-- BUTTON 1 (UNLOCKED) -->
+                <a href="w1/index.html" 
+                   class="quest-card unlocked group"
+                   onmouseenter="playHoverSound()" 
+                   onclick="playClickSound()">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="badge badge-unlocked pixel-font">UNLOCKED ⭐</span>
+                            <span class="text-xl group-hover:scale-125 transition-transform">💳</span>
+                        </div>
+                        <h3 class="font-bold text-base text-cyan-300 group-hover:text-pink-400 transition-colors">
+                            Week 1 - 數位名片
+                        </h3>
+                        <p class="text-xs text-gray-400 mt-1 vt-font text-lg">Personal Business Card</p>
+                    </div>
+                    <div class="mt-4 flex justify-between items-center text-xs text-cyan-400/80 pt-2 border-t border-cyan-900/50">
+                        <span>GO TO MISSION</span>
+                        <span class="text-lg">➔</span>
+                    </div>
+                </a>
+
+                <!-- BUTTON 2 (UNLOCKED) -->
+                <a href="w2/index.html" 
+                   class="quest-card unlocked group"
+                   onmouseenter="playHoverSound()" 
+                   onclick="playClickSound()">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="badge badge-unlocked pixel-font">UNLOCKED ⚡</span>
+                            <span class="text-xl group-hover:scale-125 transition-transform">🎰</span>
+                        </div>
+                        <h3 class="font-bold text-base text-cyan-300 group-hover:text-pink-400 transition-colors">
+                            Week 2 - 今天吃甚麼?
+                        </h3>
+                        <p class="text-xs text-gray-400 mt-1 vt-font text-lg">Random Food Picker</p>
+                    </div>
+                    <div class="mt-4 flex justify-between items-center text-xs text-cyan-400/80 pt-2 border-t border-cyan-900/50">
+                        <span>GO TO MISSION</span>
+                        <span class="text-lg">➔</span>
+                    </div>
+                </a>
+
+                <!-- BUTTON 3 ~ 16 (LOCKED) -->
+                <!-- Week 3 -->
+                <a href="javascript:void(0)" class="quest-card locked" onmouseenter="playLockedHoverSound()" onclick="triggerLockedAlert(3)">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="badge badge-locked pixel-font">LOCKED 🔒</span>
+                            <span class="text-lg opacity-60">🔒</span>
+                        </div>
+                        <h3 class="font-bold text-base text-gray-400">Week 3 - 尚未解鎖</h3>
+                        <p class="text-xs text-gray-500 mt-1 vt-font text-lg">Mission Classified</p>
+                    </div>
+                    <div class="mt-4 text-xs text-gray-600 pt-2 border-t border-gray-800">RESTRICTED ACCESS</div>
+                </a>
+
+                <!-- Week 4 -->
+                <a href="javascript:void(0)" class="quest-card locked" onmouseenter="playLockedHoverSound()" onclick="triggerLockedAlert(4)">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="badge badge-locked pixel-font">LOCKED 🔒</span>
+                            <span class="text-lg opacity-60">🔒</span>
+                        </div>
+                        <h3 class="font-bold text-base text-gray-400">Week 4 - 尚未解鎖</h3>
+                        <p class="text-xs text-gray-500 mt-1 vt-font text-lg">Mission Classified</p>
+                    </div>
+                    <div class="mt-4 text-xs text-gray-600 pt-2 border-t border-gray-800">RESTRICTED ACCESS</div>
+                </a>
+
+                <!-- Week 5 -->
+                <a href="javascript:void(0)" class="quest-card locked" onmouseenter="playLockedHoverSound()" onclick="triggerLockedAlert(5)">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="badge badge-locked pixel-font">LOCKED 🔒</span>
+                            <span class="text-lg opacity-60">🔒</span>
+                        </div>
+                        <h3 class="font-bold text-base text-gray-400">Week 5 - 尚未解鎖</h3>
+                        <p class="text-xs text-gray-500 mt-1 vt-font text-lg">Mission Classified</p>
+                    </div>
+                    <div class="mt-4 text-xs text-gray-600 pt-2 border-t border-gray-800">RESTRICTED ACCESS</div>
+                </a>
+
+                <!-- Week 6 -->
+                <a href="javascript:void(0)" class="quest-card locked" onmouseenter="playLockedHoverSound()" onclick="triggerLockedAlert(6)">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="badge badge-locked pixel-font">LOCKED 🔒</span>
+                            <span class="text-lg opacity-60">🔒</span>
+                        </div>
+                        <h3 class="font-bold text-base text-gray-400">Week 6 - 尚未解鎖</h3>
+                        <p class="text-xs text-gray-500 mt-1 vt-font text-lg">Mission Classified</p>
+                    </div>
+                    <div class="mt-4 text-xs text-gray-600 pt-2 border-t border-gray-800">RESTRICTED ACCESS</div>
+                </a>
+
+                <!-- Week 7 -->
+                <a href="javascript:void(0)" class="quest-card locked" onmouseenter="playLockedHoverSound()" onclick="triggerLockedAlert(7)">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="badge badge-locked pixel-font">LOCKED 🔒</span>
+                            <span class="text-lg opacity-60">🔒</span>
+                        </div>
+                        <h3 class="font-bold text-base text-gray-400">Week 7 - 尚未解鎖</h3>
+                        <p class="text-xs text-gray-500 mt-1 vt-font text-lg">Mission Classified</p>
+                    </div>
+                    <div class="mt-4 text-xs text-gray-600 pt-2 border-t border-gray-800">RESTRICTED ACCESS</div>
+                </a>
+
+                <!-- Week 8 -->
+                <a href="javascript:void(0)" class="quest-card locked" onmouseenter="playLockedHoverSound()" onclick="triggerLockedAlert(8)">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="badge badge-locked pixel-font">LOCKED 🔒</span>
+                            <span class="text-lg opacity-60">🔒</span>
+                        </div>
+                        <h3 class="font-bold text-base text-gray-400">Week 8 - 尚未解鎖</h3>
+                        <p class="text-xs text-gray-500 mt-1 vt-font text-lg">Mission Classified</p>
+                    </div>
+                    <div class="mt-4 text-xs text-gray-600 pt-2 border-t border-gray-800">RESTRICTED ACCESS</div>
+                </a>
+
+                <!-- Week 9 -->
+                <a href="javascript:void(0)" class="quest-card locked" onmouseenter="playLockedHoverSound()" onclick="triggerLockedAlert(9)">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="badge badge-locked pixel-font">LOCKED 🔒</span>
+                            <span class="text-lg opacity-60">🔒</span>
+                        </div>
+                        <h3 class="font-bold text-base text-gray-400">Week 9 - 尚未解鎖</h3>
+                        <p class="text-xs text-gray-500 mt-1 vt-font text-lg">Mission Classified</p>
+                    </div>
+                    <div class="mt-4 text-xs text-gray-600 pt-2 border-t border-gray-800">RESTRICTED ACCESS</div>
+                </a>
+
+                <!-- Week 10 -->
+                <a href="javascript:void(0)" class="quest-card locked" onmouseenter="playLockedHoverSound()" onclick="triggerLockedAlert(10)">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="badge badge-locked pixel-font">LOCKED 🔒</span>
+                            <span class="text-lg opacity-60">🔒</span>
+                        </div>
+                        <h3 class="font-bold text-base text-gray-400">Week 10 - 尚未解鎖</h3>
+                        <p class="text-xs text-gray-500 mt-1 vt-font text-lg">Mission Classified</p>
+                    </div>
+                    <div class="mt-4 text-xs text-gray-600 pt-2 border-t border-gray-800">RESTRICTED ACCESS</div>
+                </a>
+
+                <!-- Week 11 -->
+                <a href="javascript:void(0)" class="quest-card locked" onmouseenter="playLockedHoverSound()" onclick="triggerLockedAlert(11)">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="badge badge-locked pixel-font">LOCKED 🔒</span>
+                            <span class="text-lg opacity-60">🔒</span>
+                        </div>
+                        <h3 class="font-bold text-base text-gray-400">Week 11 - 尚未解鎖</h3>
+                        <p class="text-xs text-gray-500 mt-1 vt-font text-lg">Mission Classified</p>
+                    </div>
+                    <div class="mt-4 text-xs text-gray-600 pt-2 border-t border-gray-800">RESTRICTED ACCESS</div>
+                </a>
+
+                <!-- Week 12 -->
+                <a href="javascript:void(0)" class="quest-card locked" onmouseenter="playLockedHoverSound()" onclick="triggerLockedAlert(12)">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="badge badge-locked pixel-font">LOCKED 🔒</span>
+                            <span class="text-lg opacity-60">🔒</span>
+                        </div>
+                        <h3 class="font-bold text-base text-gray-400">Week 12 - 尚未解鎖</h3>
+                        <p class="text-xs text-gray-500 mt-1 vt-font text-lg">Mission Classified</p>
+                    </div>
+                    <div class="mt-4 text-xs text-gray-600 pt-2 border-t border-gray-800">RESTRICTED ACCESS</div>
+                </a>
+
+                <!-- Week 13 -->
+                <a href="javascript:void(0)" class="quest-card locked" onmouseenter="playLockedHoverSound()" onclick="triggerLockedAlert(13)">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="badge badge-locked pixel-font">LOCKED 🔒</span>
+                            <span class="text-lg opacity-60">🔒</span>
+                        </div>
+                        <h3 class="font-bold text-base text-gray-400">Week 13 - 尚未解鎖</h3>
+                        <p class="text-xs text-gray-500 mt-1 vt-font text-lg">Mission Classified</p>
+                    </div>
+                    <div class="mt-4 text-xs text-gray-600 pt-2 border-t border-gray-800">RESTRICTED ACCESS</div>
+                </a>
+
+                <!-- Week 14 -->
+                <a href="javascript:void(0)" class="quest-card locked" onmouseenter="playLockedHoverSound()" onclick="triggerLockedAlert(14)">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="badge badge-locked pixel-font">LOCKED 🔒</span>
+                            <span class="text-lg opacity-60">🔒</span>
+                        </div>
+                        <h3 class="font-bold text-base text-gray-400">Week 14 - 尚未解鎖</h3>
+                        <p class="text-xs text-gray-500 mt-1 vt-font text-lg">Mission Classified</p>
+                    </div>
+                    <div class="mt-4 text-xs text-gray-600 pt-2 border-t border-gray-800">RESTRICTED ACCESS</div>
+                </a>
+
+                <!-- Week 15 -->
+                <a href="javascript:void(0)" class="quest-card locked" onmouseenter="playLockedHoverSound()" onclick="triggerLockedAlert(15)">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="badge badge-locked pixel-font">LOCKED 🔒</span>
+                            <span class="text-lg opacity-60">🔒</span>
+                        </div>
+                        <h3 class="font-bold text-base text-gray-400">Week 15 - 尚未解鎖</h3>
+                        <p class="text-xs text-gray-500 mt-1 vt-font text-lg">Mission Classified</p>
+                    </div>
+                    <div class="mt-4 text-xs text-gray-600 pt-2 border-t border-gray-800">RESTRICTED ACCESS</div>
+                </a>
+
+                <!-- Week 16 -->
+                <a href="javascript:void(0)" class="quest-card locked" onmouseenter="playLockedHoverSound()" onclick="triggerLockedAlert(16)">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="badge badge-locked pixel-font">FINAL BOSS 👑</span>
+                            <span class="text-lg opacity-60">🔒</span>
+                        </div>
+                        <h3 class="font-bold text-base text-gray-400">Week 16 - 終極專案</h3>
+                        <p class="text-xs text-gray-500 mt-1 vt-font text-lg">Final Showcase</p>
+                    </div>
+                    <div class="mt-4 text-xs text-gray-600 pt-2 border-t border-gray-800">RESTRICTED ACCESS</div>
+                </a>
+
+            </div>
+        </section>
+
+        <!-- Footer Notice -->
+        <footer class="p-4 text-center border-t border-cyan-900/40 text-xs text-gray-400 vt-font text-lg">
+            © 2000-2026 WEB PORTFOLIO SYSTEM. ALL RIGHTS RESERVED. // MADE WITH Y2K POWER ⚡
+        </footer>
+    </main>
+
+    <!-- Toast Notification Message -->
+    <div id="toast" class="pixel-font text-xs flex items-center gap-2">
+        <span>🔒</span>
+        <span id="toastMsg">LEVEL LOCKED! COMPLETE PREVIOUS WEEKS FIRST.</span>
+    </div>
+
+    <script>
+        // Audio Context Setup for 8-bit sound effects
+        let audioCtx = null;
+        let soundEnabled = true;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        // Play synth beep tone
+        function playSynthTone(freq, type, duration, vol = 0.1) {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                
+                osc.type = type; // 'square', 'sawtooth', 'sine'
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                
+                gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {
+                // Audio Context fallback
+            }
+        }
+
+        // Sound Effects
+        function playHoverSound() {
+            playSynthTone(587.33, 'square', 0.08, 0.05); // D5 high pitch
+        }
+
+        function playClickSound() {
+            playSynthTone(880, 'square', 0.12, 0.08); // A5
+            setTimeout(() => playSynthTone(1760, 'square', 0.15, 0.08), 60);
+        }
+
+        function playLockedHoverSound() {
+            playSynthTone(150, 'sawtooth', 0.08, 0.04); // Low buzz
+        }
+
+        function playErrorSound() {
+            if (!soundEnabled) return;
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 0.2);
+                gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.2);
+            } catch (e) {}
+        }
+
+        // Toggle Sound Mute
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const btn = document.getElementById('soundToggle');
+            btn.innerText = soundEnabled ? '🔊 SOUND: ON' : '🔇 SOUND: OFF';
+            btn.classList.toggle('text-cyan-300', soundEnabled);
+            btn.classList.toggle('text-gray-500', !soundEnabled);
+            if (soundEnabled) playClickSound();
+        }
+
+        // Toggle CRT Scanlines Filter
+        function toggleCRT() {
+            const crt = document.getElementById('crtOverlay');
+            const btn = document.getElementById('crtToggle');
+            const isVisible = crt.style.opacity !== '0';
+            
+            crt.style.opacity = isVisible ? '0' : '0.85';
+            btn.innerText = isVisible ? '📺 CRT: OFF' : '📺 CRT: ON';
+            btn.classList.toggle('text-pink-300', !isVisible);
+            btn.classList.toggle('text-gray-500', isVisible);
+            playClickSound();
+        }
+
+        let toastTimeout;
+        function triggerLockedAlert(weekNum) {
+            playErrorSound();
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            
+            toastMsg.innerText = `🔒 WEEK ${weekNum} 未解鎖！請先完成前面關卡任務！`;
+            toast.classList.add('show');
+            
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2500);
+        }
+
+        // Global keypress easter egg or sound init on first click
+        window.addEventListener('click', () => {
+            initAudio();
+        }, { once: true });
+    </script>
+</body>
+</html>
