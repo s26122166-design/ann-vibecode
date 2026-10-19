@@ -1,746 +1,602 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚡ Y2K PORTFOLIO HUB // WEB QUEST 2000 ⚡</title>
-    <!-- Google Fonts: VT323, Press Start 2P, Noto Sans TC -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
-    <!-- Tailwind CSS for Utility layout -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <style>
-        :root {
-            --neon-pink: #ff007f;
-            --neon-cyan: #00f0ff;
-            --neon-green: #00ff66;
-            --neon-yellow: #ffe600;
-            --bg-dark: #0a0518;
-            --card-dark: rgba(20, 10, 35, 0.85);
-            --locked-gray: #2d2b38;
-            --chrome-border: linear-gradient(135deg, #ffffff 0%, #a6a6a6 50%, #ffffff 75%, #3a3a3a 100%);
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>朋友對我的動態留言板</title>
+  
+  <!-- 引入 Google 字型 (Noto Sans TC & Fredoka) 提升休閒質感 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  
+  <!-- 引入 FontAwesome 圖示庫 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-        * {
-            box-sizing: border-box;
-            user-select: none;
-        }
+  <style>
+    /* =========================================================
+       🎨【色彩與主題控制區 (CSS Variables)】
+       若想更換主題配色，可直接在這裡修改顏色碼！
+       ========================================================= */
+    :root {
+      /* 頁面背景：溫暖奶油舒壓漸層色 */
+      --bg-gradient-start: #FFF9F3;
+      --bg-gradient-end: #F3E9DD;
+      
+      /* 文字主要與次要顏色 */
+      --text-main: #4A3E3D;
+      --text-sub: #8C7A78;
 
-        body {
-            background-color: var(--bg-dark);
-            color: #ffffff;
-            font-family: 'Noto Sans TC', 'VT323', sans-serif;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
-            overflow-x: hidden;
-            /* Cyber grid background */
-            background-image: 
-                linear-gradient(rgba(0, 240, 255, 0.08) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 240, 255, 0.08) 1px, transparent 1px);
-            background-size: 30px 30px;
-            background-position: center center;
-        }
+      /* 一般卡片背景與柔和陰影 */
+      --card-bg: #FFFFFF;
+      --card-shadow: 0 10px 25px rgba(140, 122, 120, 0.08);
 
-        .crt-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background: linear-gradient(
-                rgba(18, 16, 16, 0) 50%, 
-                rgba(0, 0, 0, 0.25) 50%
-            ), linear-gradient(
-                90deg,
-                rgba(255, 0, 0, 0.03),
-                rgba(0, 255, 0, 0.01),
-                rgba(0, 0, 255, 0.03)
-            );
-            background-size: 100% 3px, 6px 100%;
-            pointer-events: none;
-            z-index: 999;
-            opacity: 0.85;
-            transition: opacity 0.3s ease;
-        }
+      /* 💡【亮燈聚焦特效控制區】 */
+      --highlight-border: #FF7E5F;         /* 聚焦卡片的亮邊框顏色 (暖珊瑚橘) */
+      --highlight-glow: rgba(255, 126, 95, 0.4); /* 聚焦卡片的發光暈影 */
+      --highlight-badge: #FF6B6B;        /* 聚焦標籤背景色 */
 
-        .pixel-font {
-            font-family: 'Press Start 2P', cursive;
-        }
+      /* 隨機頭像粉彩配色庫 (Pastel Palette) */
+      --avatar-color-1: #FFB7B2;
+      --avatar-color-2: #FFDAC1;
+      --avatar-color-3: #E2F0CB;
+      --avatar-color-4: #B5EAD7;
+      --avatar-color-5: #C7CEEA;
+    }
 
-        .vt-font {
-            font-family: 'VT323', monospace;
-        }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-        .y2k-window {
-            background: var(--card-dark);
-            border: 2px solid var(--neon-cyan);
-            box-shadow: 
-                0 0 20px rgba(0, 240, 255, 0.3),
-                inset 0 0 15px rgba(0, 240, 255, 0.15),
-                8px 8px 0px rgba(255, 0, 127, 0.5);
-            border-radius: 12px;
-            backdrop-filter: blur(10px);
-            position: relative;
-            overflow: hidden;
-        }
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+      color: var(--text-main);
+      min-height: 100vh;
+      padding: 2.5rem 1rem 4rem 1rem;
+    }
 
-        .y2k-window-header {
-            background: linear-gradient(90deg, #00f0ff 0%, #ff007f 100%);
-            padding: 6px 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-weight: bold;
-            color: #000;
-        }
+    /* 頁面標題區域 */
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
 
-        /* Floating stickers decoration */
-        .floating-sticker {
-            position: absolute;
-            pointer-events: none;
-            animation: floatAnim 4s ease-in-out infinite alternate;
-            z-index: 10;
-            filter: drop-shadow(0 0 8px rgba(255,255,255,0.6));
-        }
+    header h1 {
+      font-family: 'Fredoka', 'Noto Sans TC', sans-serif;
+      font-size: 2.2rem;
+      color: #3D3130;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 0.5rem;
+    }
 
-        @keyframes floatAnim {
-            0% { transform: translateY(0px) rotate(0deg); }
-            100% { transform: translateY(-12px) rotate(8deg); }
-        }
+    header p {
+      color: var(--text-sub);
+      font-size: 1rem;
+    }
 
-        .avatar-container {
-            position: relative;
-            width: 130px;
-            height: 130px;
-            margin: 0 auto;
-        }
+    /* 狀態顯示列 (顯示目前輪播狀態) */
+    .status-bar {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      margin-top: 1rem;
+    }
 
-        .avatar-frame {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            padding: 5px;
-            background: linear-gradient(45deg, var(--neon-cyan), var(--neon-pink), var(--neon-green), var(--neon-yellow));
-            background-size: 300% 300%;
-            animation: rotateGradient 4s linear infinite;
-            box-shadow: 0 0 25px rgba(255, 0, 127, 0.6);
-        }
+    .status-badge {
+      background: rgba(255, 255, 255, 0.85);
+      padding: 6px 18px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      color: var(--text-sub);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
 
-        .avatar-img {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid #0a0518;
-            background-color: #1a0f35;
-        }
+    .status-badge i {
+      color: var(--highlight-border);
+      animation: pulse 1.5s infinite;
+    }
 
-        @keyframes rotateGradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
+    @keyframes pulse {
+      0% { opacity: 0.4; }
+      50% { opacity: 1; }
+      100% { opacity: 0.4; }
+    }
 
-        .quest-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 18px;
-        }
+    /* 主容器 */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
 
-        @media (max-width: 1024px) {
-            .quest-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
+    /* =========================================================
+       🌀【載入中動畫效果】(Loading Animation)
+       ========================================================= */
+    #loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 5rem 0;
+      gap: 1.2rem;
+    }
 
-        @media (max-width: 550px) {
-            .quest-grid {
-                grid-template-columns: 1fr;
-            }
-        }
+    .loading-bubbles {
+      display: flex;
+      gap: 10px;
+    }
 
-        /* Unlocked Card Style */
-        .quest-card {
-            background: linear-gradient(145deg, rgba(25, 15, 45, 0.9), rgba(10, 5, 25, 0.95));
-            border: 2px solid var(--neon-cyan);
-            border-radius: 12px;
-            padding: 16px;
-            position: relative;
-            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            text-decoration: none;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            min-height: 130px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(0, 240, 255, 0.1);
-            overflow: hidden;
-        }
+    .bubble {
+      width: 16px;
+      height: 16px;
+      background-color: var(--highlight-border);
+      border-radius: 50%;
+      animation: bounce 1.4s infinite ease-in-out both;
+    }
 
-        .quest-card::before {
-            content: '';
-            position: absolute;
-            top: -50%; left: -50%;
-            width: 200%; height: 200%;
-            background: linear-gradient(
-                45deg,
-                transparent,
-                rgba(255, 255, 255, 0.15),
-                transparent
-            );
-            transform: rotate(45deg) translateY(-100%);
-            transition: transform 0.6s ease;
-        }
+    .bubble:nth-child(1) { animation-delay: -0.32s; }
+    .bubble:nth-child(2) { animation-delay: -0.16s; }
 
-        .quest-card:hover::before {
-            transform: rotate(45deg) translateY(100%);
-        }
+    @keyframes bounce {
+      0%, 80%, 100% { transform: scale(0); }
+      40% { transform: scale(1.0); }
+    }
 
-        .quest-card.unlocked:hover {
-            transform: translateY(-6px) scale(1.02);
-            border-color: var(--neon-pink);
-            box-shadow: 
-                0 0 25px rgba(255, 0, 127, 0.6),
-                0 10px 20px rgba(0, 0, 0, 0.8),
-                inset 0 0 15px rgba(255, 0, 127, 0.3);
-        }
+    .loading-text {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: var(--text-sub);
+      letter-spacing: 1px;
+    }
 
-        .quest-card.unlocked:active {
-            transform: translateY(-2px) scale(0.99);
-        }
+    /* =========================================================
+       🧱【瀑布流排版 (Masonry Layout)】
+       ========================================================= */
+    .masonry-wall {
+      /* 桌機預設 3 欄 */
+      column-count: 3;
+      column-gap: 1.8rem;
+      width: 100%;
+      transition: filter 0.5s ease;
+    }
 
-        .quest-card.locked {
-            background: linear-gradient(145deg, rgba(30, 30, 40, 0.8), rgba(15, 15, 20, 0.9));
-            border: 2px dashed #4a4a60;
-            color: #7a7a95;
-            cursor: not-allowed;
-            filter: grayscale(0.8);
-            opacity: 0.75;
-        }
+    /* 平板調整為 2 欄 */
+    @media (max-width: 900px) {
+      .masonry-wall {
+        column-count: 2;
+        column-gap: 1.2rem;
+      }
+    }
 
-        .quest-card.locked:hover {
-            animation: lockedShake 0.4s ease-in-out;
-            border-color: #ff3344;
-            box-shadow: 0 0 15px rgba(255, 51, 68, 0.4);
-            color: #b0b0c5;
-        }
+    /* 手機調整為 1 欄 */
+    @media (max-width: 600px) {
+      .masonry-wall {
+        column-count: 1;
+      }
+    }
 
-        @keyframes lockedShake {
-            0%, 100% { transform: translateX(0); }
-            20% { transform: translateX(-6px) rotate(-1deg); }
-            40% { transform: translateX(6px) rotate(1deg); }
-            60% { transform: translateX(-4px); }
-            80% { transform: translateX(4px); }
-        }
+    /* =========================================================
+       💌【留言卡片基礎樣式】
+       ========================================================= */
+    .card {
+      /* 關鍵設定：防止卡片在瀑布流欄位間被拆斷 */
+      break-inside: avoid;
+      page-break-inside: avoid;
+      -webkit-column-break-inside: avoid;
 
-        /* Badge Pills */
-        .badge {
-            font-size: 10px;
-            padding: 3px 8px;
-            border-radius: 20px;
-            text-transform: uppercase;
-            font-weight: bold;
-            letter-spacing: 1px;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
+      background: var(--card-bg);
+      border-radius: 20px;
+      padding: 1.5rem;
+      margin-bottom: 1.8rem;
+      box-shadow: var(--card-shadow);
+      border: 2px solid transparent;
+      position: relative;
 
-        .badge-unlocked {
-            background: var(--neon-cyan);
-            color: #000;
-            box-shadow: 0 0 10px var(--neon-cyan);
-        }
+      /* 平滑視覺轉換 (轉場靈魂) */
+      transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+      cursor: pointer;
+    }
 
-        .badge-locked {
-            background: #2a2a3a;
-            color: #8888a0;
-            border: 1px solid #444455;
-        }
+    /* 卡片頭部：頭像 + 名字 + 時間 */
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 1rem;
+    }
 
-        /* Marquee Bar */
-        .marquee-container {
-            background: #000;
-            border-top: 1px solid var(--neon-cyan);
-            border-bottom: 1px solid var(--neon-cyan);
-            color: var(--neon-yellow);
-            overflow: hidden;
-            white-space: nowrap;
-            padding: 6px 0;
-            font-size: 14px;
-        }
+    .avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.15rem;
+      color: #555;
+      flex-shrink: 0;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
+    }
 
-        .marquee-content {
-            display: inline-block;
-            animation: marquee 22s linear infinite;
-        }
+    .user-info {
+      display: flex;
+      flex-direction: column;
+    }
 
-        @keyframes marquee {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
-        }
+    .user-name {
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: var(--text-main);
+    }
 
-        /* Custom Toast Notification */
-        #toast {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: rgba(255, 0, 60, 0.95);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            border: 2px solid #ffffff;
-            box-shadow: 0 0 20px rgba(255, 0, 60, 0.8);
-            font-weight: bold;
-            z-index: 1000;
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
-            opacity: 0;
-            pointer-events: none;
-        }
+    .timestamp {
+      font-size: 0.78rem;
+      color: var(--text-sub);
+      margin-top: 2px;
+    }
 
-        #toast.show {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
-        }
-    </style>
+    /* 卡片內文區域 */
+    .card-body {
+      font-size: 0.98rem;
+      line-height: 1.65;
+      color: #5A4E4D;
+      white-space: pre-wrap; /* 保留留言換行與空格 */
+      word-break: break-word;
+    }
+
+    /* 右上角可愛引號圖示 */
+    .quote-icon {
+      position: absolute;
+      top: 1.2rem;
+      right: 1.2rem;
+      font-size: 1.3rem;
+      color: #F0E6DF;
+      transition: color 0.5s ease;
+    }
+
+    /* =========================================================
+       ✨【隨時間輪播：高亮亮燈 (Highlight) 特效】
+       ========================================================= */
+    /* 被選中的卡片：放大、亮起發光、突顯層級 */
+    .card.highlight {
+      transform: scale(1.06) translateY(-6px);
+      border-color: var(--highlight-border);
+      box-shadow: 0 16px 38px var(--highlight-glow);
+      z-index: 10;
+      opacity: 1 !important;
+      filter: blur(0px) !important;
+    }
+
+    .card.highlight .quote-icon {
+      color: var(--highlight-border);
+    }
+
+    /* 高亮時右上角自動出現的亮眼小標籤 */
+    .card.highlight::after {
+      content: "✨ Spotlight";
+      position: absolute;
+      top: -12px;
+      right: 20px;
+      background: var(--highlight-badge);
+      color: white;
+      font-size: 0.75rem;
+      font-weight: bold;
+      padding: 3px 10px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      animation: popIn 0.4s ease;
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 當有卡片高亮時，其他未選中的卡片稍微變暗、變模糊 */
+    .masonry-wall.has-highlight .card:not(.highlight) {
+      opacity: 0.42;
+      filter: blur(1.2px) grayscale(15%);
+      transform: scale(0.96);
+    }
+
+    /* 滑鼠懸停於卡片時微幅抬升 */
+    .card:hover {
+      transform: translateY(-4px);
+    }
+  </style>
 </head>
-<body class="flex flex-col items-center justify-center p-3 sm:p-6">
+<body>
 
-    <div id="crtOverlay" class="crt-overlay"></div>
+  <!-- 頁頭標題區 -->
+  <header>
+    <h1><i class="fa-solid fa-heart-pulse"></i> 朋友對我的動態留言板</h1>
+    <p>隨時間輪流播放朋友給我的暖心話語 💭</p>
+    <div class="status-bar">
+      <div class="status-badge" id="carouselStatus">
+        <i class="fa-solid fa-sparkles"></i> 準備播放留言中...
+      </div>
+    </div>
+  </header>
 
-    <!-- Floating Y2K Visual Aesthetics -->
-    <div class="floating-sticker text-3xl sm:text-4xl" style="top: 5%; left: 3%;">💿</div>
-    <div class="floating-sticker text-2xl sm:text-3xl" style="top: 12%; right: 4%; animation-delay: -1.5s;">✦</div>
-    <div class="floating-sticker text-3xl sm:text-4xl" style="bottom: 8%; left: 5%; animation-delay: -2s;">👾</div>
-    <div class="floating-sticker text-3xl sm:text-4xl" style="bottom: 10%; right: 5%; animation-delay: -0.8s;">⚡</div>
-
-    <main class="w-full max-w-5xl y2k-window my-4">
-        <!-- Window Titlebar -->
-        <div class="y2k-window-header vt-font text-lg tracking-wider">
-            <div class="flex items-center gap-2">
-                <span class="text-xl">🌐</span>
-                <span>CYBER_PORTFOLIO_SYSTEM_2000.EXE</span>
-            </div>
-            <div class="flex items-center gap-3">
-                <button id="soundToggle" onclick="toggleSound()" class="px-2 py-0.5 bg-black text-xs text-cyan-300 border border-cyan-400 hover:bg-cyan-400 hover:text-black transition">
-                    🔊 SOUND: ON
-                </button>
-                <button id="crtToggle" onclick="toggleCRT()" class="px-2 py-0.5 bg-black text-xs text-pink-300 border border-pink-400 hover:bg-pink-400 hover:text-black transition">
-                    📺 CRT: ON
-                </button>
-                <div class="flex gap-1 ml-2">
-                    <span class="w-3 h-3 rounded-full bg-yellow-400 inline-block"></span>
-                    <span class="w-3 h-3 rounded-full bg-green-400 inline-block"></span>
-                    <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Marquee Ticker -->
-        <div class="marquee-container vt-font text-lg">
-            <div class="marquee-content">
-                ★ WELCOME TO MY Y2K WEB DESIGN PORTFOLIO ★ CLEAR WEEKS TO UNLOCK NEW QUESTS ★ CURRENT LEVEL: 02 // SYSTEM STATUS: ONLINE ★ BEST VIEWED IN 1024x768 ★
-            </div>
-        </div>
-
-        <section class="p-6 sm:p-8 text-center flex flex-col items-center justify-center border-b border-cyan-900/60">
-            <!-- Profile Avatar -->
-            <div class="avatar-container mb-4">
-                <div class="avatar-frame">
-                    <!-- Default SVG Y2K Pixel Avatar -->
-                    <img src="https://api.dicebear.com/7.x/pixel-art/svg?seed=Y2KMaster&backgroundColor=0a0518" 
-                         alt="User Avatar" 
-                         class="avatar-img"
-                         onerror="this.src='https://placehold.co/150x150/ff007f/fff?text=Y2K+ME'">
-                </div>
-                <div class="absolute -bottom-2 -right-2 bg-black border border-green-400 text-green-400 text-[10px] px-2 py-0.5 rounded-full pixel-font flex items-center gap-1 shadow-md">
-                    <span class="w-2 h-2 rounded-full bg-green-400 animate-ping"></span> ONLINE
-                </div>
-            </div>
-
-            <!-- Profile Title & Status -->
-            <h1 class="text-2xl sm:text-4xl font-extrabold tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-pink-500 to-yellow-300 drop-shadow-[0_2px_10px_rgba(0,240,255,0.8)] mb-2">
-                ⚡ 網頁設計戰隊 - 阮紅安 ⚡
-            </h1>
-            <p class="text-gray-300 vt-font text-xl sm:text-2xl tracking-widest max-w-xl">
-                [ LV.99 WEB DEVELOPER ] // WEEKLY QUEST PORTAL
-            </p>
-
-            <!-- Retro Status Chips -->
-            <div class="flex flex-wrap justify-center gap-3 mt-4 text-xs pixel-font">
-                <span class="px-3 py-1 bg-purple-950/80 border border-purple-500/50 rounded text-pink-300">
-                    CLASS: FRONTEND HERO
-                </span>
-                <span class="px-3 py-1 bg-cyan-950/80 border border-cyan-500/50 rounded text-cyan-300">
-                    COMPLETED: 2 / 16
-                </span>
-                <span class="px-3 py-1 bg-yellow-950/80 border border-yellow-500/50 rounded text-yellow-300">
-                    XP: 1250 / 9999
-                </span>
-            </div>
-        </section>
-
-        <section class="p-6 sm:p-8">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl sm:text-2xl font-bold tracking-wide flex items-center gap-2 text-cyan-300 vt-font text-2xl">
-                    <span>🎮</span> SELECT QUEST LEVEL (16 WEEKS)
-                </h2>
-                <span class="text-xs text-gray-400 vt-font text-base">CLICK UNLOCKED CARDS TO ENTER</span>
-            </div>
-
-            <!-- 16 Quest Grid Container -->
-            <div class="quest-grid">
-                
-                <!-- BUTTON 1 (UNLOCKED) -->
-                <a href="w1/index.html" 
-                   class="quest-card unlocked group"
-                   onmouseenter="playHoverSound()" 
-                   onclick="playClickSound()">
-                    <div>
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="badge badge-unlocked pixel-font">UNLOCKED ⭐</span>
-                            <span class="text-xl group-hover:scale-125 transition-transform">💳</span>
-                        </div>
-                        <h3 class="font-bold text-base text-cyan-300 group-hover:text-pink-400 transition-colors">
-                            Week 1 - 數位名片
-                        </h3>
-                        <p class="text-xs text-gray-400 mt-1 vt-font text-lg">Personal Business Card</p>
-                    </div>
-                    <div class="mt-4 flex justify-between items-center text-xs text-cyan-400/80 pt-2 border-t border-cyan-900/50">
-                        <span>GO TO MISSION</span>
-                        <span class="text-lg">➔</span>
-                    </div>
-                </a>
-
-                <!-- BUTTON 2 (UNLOCKED) -->
-                <a href="w2/index.html" 
-                   class="quest-card unlocked group"
-                   onmouseenter="playHoverSound()" 
-                   onclick="playClickSound()">
-                    <div>
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="badge badge-unlocked pixel-font">UNLOCKED ⚡</span>
-                            <span class="text-xl group-hover:scale-125 transition-transform">🎰</span>
-                        </div>
-                        <h3 class="font-bold text-base text-cyan-300 group-hover:text-pink-400 transition-colors">
-                            Week 2 - 今天吃甚麼?
-                        </h3>
-                        <p class="text-xs text-gray-400 mt-1 vt-font text-lg">Random Food Picker</p>
-                    </div>
-                    <div class="mt-4 flex justify-between items-center text-xs text-cyan-400/80 pt-2 border-t border-cyan-900/50">
-                        <span>GO TO MISSION</span>
-                        <span class="text-lg">➔</span>
-                    </div>
-                </a>
-
-                <!-- BUTTON 3 ~ 16 (LOCKED) -->
-                <!-- Week 3 -->
-                <a href="javascript:void(0)" class="quest-card locked" onmouseenter="playLockedHoverSound()" onclick="triggerLockedAlert(3)">
-                    <div>
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="badge badge-locked pixel-font">LOCKED 🔒</span>
-                            <span class="text-lg opacity-60">🔒</span>
-                        </div>
-                        <h3 class="font-bold text-base text-gray-400">Week 3 - 尚未解鎖</h3>
-                        <p class="text-xs text-gray-500 mt-1 vt-font text-lg">Mission Classified</p>
-                    </div>
-                    <div class="mt-4 text-xs text-gray-600 pt-2 border-t border-gray-800">RESTRICTED ACCESS</div>
-                </a>
-
-                <!-- Week 4 -->
-                <a href="javascript:void(0)" class="quest-card locked" onmouseenter="playLockedHoverSound()" onclick="triggerLockedAlert(4)">
-                    <div>
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="badge badge-locked pixel-font">LOCKED 🔒</span>
-                            <span class="text-lg opacity-60">🔒</span>
-                        </div>
-                        <h3 class="font-bold text-base text-gray-400">Week 4 - 尚未解鎖</h3>
-                        <p class="text-xs text-gray-500 mt-1 vt-font text-lg">Mission Classified</p>
-                    </div>
-                    <div class="mt-4 text-xs text-gray-600 pt-2 border-t border-gray-800">RESTRICTED ACCESS</div>
-                </a>
-
-                <!-- Week 5 -->
-                <a href="javascript:void(0)" class="quest-card locked" onmouseenter="playLockedHoverSound()" onclick="triggerLockedAlert(5)">
-                    <div>
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="badge badge-locked pixel-font">LOCKED 🔒</span>
-                            <span class="text-lg opacity-60">🔒</span>
-                        </div>
-                        <h3 class="font-bold text-base text-gray-400">Week 5 - 尚未解鎖</h3>
-                        <p class="text-xs text-gray-500 mt-1 vt-font text-lg">Mission Classified</p>
-                    </div>
-                    <div class="mt-4 text-xs text-gray-600 pt-2 border-t border-gray-800">RESTRICTED ACCESS</div>
-                </a>
-
-                <!-- Week 6 -->
-                <a href="javascript:void(0)" class="quest-card locked" onmouseenter="playLockedHoverSound()" onclick="triggerLockedAlert(6)">
-                    <div>
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="badge badge-locked pixel-font">LOCKED 🔒</span>
-                            <span class="text-lg opacity-60">🔒</span>
-                        </div>
-                        <h3 class="font-bold text-base text-gray-400">Week 6 - 尚未解鎖</h3>
-                        <p class="text-xs text-gray-500 mt-1 vt-font text-lg">Mission Classified</p>
-                    </div>
-                    <div class="mt-4 text-xs text-gray-600 pt-2 border-t border-gray-800">RESTRICTED ACCESS</div>
-                </a>
-
-                <!-- Week 7 -->
-                <a href="javascript:void(0)" class="quest-card locked" onmouseenter="playLockedHoverSound()" onclick="triggerLockedAlert(7)">
-                    <div>
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="badge badge-locked pixel-font">LOCKED 🔒</span>
-                            <span class="text-lg opacity-60">🔒</span>
-                        </div>
-                        <h3 class="font-bold text-base text-gray-400">Week 7 - 尚未解鎖</h3>
-                        <p class="text-xs text-gray-500 mt-1 vt-font text-lg">Mission Classified</p>
-                    </div>
-                    <div class="mt-4 text-xs text-gray-600 pt-2 border-t border-gray-800">RESTRICTED ACCESS</div>
-                </a>
-
-                <!-- Week 8 -->
-                <a href="javascript:void(0)" class="quest-card locked" onmouseenter="playLockedHoverSound()" onclick="triggerLockedAlert(8)">
-                    <div>
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="badge badge-locked pixel-font">LOCKED 🔒</span>
-                            <span class="text-lg opacity-60">🔒</span>
-                        </div>
-                        <h3 class="font-bold text-base text-gray-400">Week 8 - 尚未解鎖</h3>
-                        <p class="text-xs text-gray-500 mt-1 vt-font text-lg">Mission Classified</p>
-                    </div>
-                    <div class="mt-4 text-xs text-gray-600 pt-2 border-t border-gray-800">RESTRICTED ACCESS</div>
-                </a>
-
-                <!-- Week 9 -->
-                <a href="javascript:void(0)" class="quest-card locked" onmouseenter="playLockedHoverSound()" onclick="triggerLockedAlert(9)">
-                    <div>
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="badge badge-locked pixel-font">LOCKED 🔒</span>
-                            <span class="text-lg opacity-60">🔒</span>
-                        </div>
-                        <h3 class="font-bold text-base text-gray-400">Week 9 - 尚未解鎖</h3>
-                        <p class="text-xs text-gray-500 mt-1 vt-font text-lg">Mission Classified</p>
-                    </div>
-                    <div class="mt-4 text-xs text-gray-600 pt-2 border-t border-gray-800">RESTRICTED ACCESS</div>
-                </a>
-
-                <!-- Week 10 -->
-                <a href="javascript:void(0)" class="quest-card locked" onmouseenter="playLockedHoverSound()" onclick="triggerLockedAlert(10)">
-                    <div>
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="badge badge-locked pixel-font">LOCKED 🔒</span>
-                            <span class="text-lg opacity-60">🔒</span>
-                        </div>
-                        <h3 class="font-bold text-base text-gray-400">Week 10 - 尚未解鎖</h3>
-                        <p class="text-xs text-gray-500 mt-1 vt-font text-lg">Mission Classified</p>
-                    </div>
-                    <div class="mt-4 text-xs text-gray-600 pt-2 border-t border-gray-800">RESTRICTED ACCESS</div>
-                </a>
-
-                <!-- Week 11 -->
-                <a href="javascript:void(0)" class="quest-card locked" onmouseenter="playLockedHoverSound()" onclick="triggerLockedAlert(11)">
-                    <div>
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="badge badge-locked pixel-font">LOCKED 🔒</span>
-                            <span class="text-lg opacity-60">🔒</span>
-                        </div>
-                        <h3 class="font-bold text-base text-gray-400">Week 11 - 尚未解鎖</h3>
-                        <p class="text-xs text-gray-500 mt-1 vt-font text-lg">Mission Classified</p>
-                    </div>
-                    <div class="mt-4 text-xs text-gray-600 pt-2 border-t border-gray-800">RESTRICTED ACCESS</div>
-                </a>
-
-                <!-- Week 12 -->
-                <a href="javascript:void(0)" class="quest-card locked" onmouseenter="playLockedHoverSound()" onclick="triggerLockedAlert(12)">
-                    <div>
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="badge badge-locked pixel-font">LOCKED 🔒</span>
-                            <span class="text-lg opacity-60">🔒</span>
-                        </div>
-                        <h3 class="font-bold text-base text-gray-400">Week 12 - 尚未解鎖</h3>
-                        <p class="text-xs text-gray-500 mt-1 vt-font text-lg">Mission Classified</p>
-                    </div>
-                    <div class="mt-4 text-xs text-gray-600 pt-2 border-t border-gray-800">RESTRICTED ACCESS</div>
-                </a>
-
-                <!-- Week 13 -->
-                <a href="javascript:void(0)" class="quest-card locked" onmouseenter="playLockedHoverSound()" onclick="triggerLockedAlert(13)">
-                    <div>
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="badge badge-locked pixel-font">LOCKED 🔒</span>
-                            <span class="text-lg opacity-60">🔒</span>
-                        </div>
-                        <h3 class="font-bold text-base text-gray-400">Week 13 - 尚未解鎖</h3>
-                        <p class="text-xs text-gray-500 mt-1 vt-font text-lg">Mission Classified</p>
-                    </div>
-                    <div class="mt-4 text-xs text-gray-600 pt-2 border-t border-gray-800">RESTRICTED ACCESS</div>
-                </a>
-
-                <!-- Week 14 -->
-                <a href="javascript:void(0)" class="quest-card locked" onmouseenter="playLockedHoverSound()" onclick="triggerLockedAlert(14)">
-                    <div>
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="badge badge-locked pixel-font">LOCKED 🔒</span>
-                            <span class="text-lg opacity-60">🔒</span>
-                        </div>
-                        <h3 class="font-bold text-base text-gray-400">Week 14 - 尚未解鎖</h3>
-                        <p class="text-xs text-gray-500 mt-1 vt-font text-lg">Mission Classified</p>
-                    </div>
-                    <div class="mt-4 text-xs text-gray-600 pt-2 border-t border-gray-800">RESTRICTED ACCESS</div>
-                </a>
-
-                <!-- Week 15 -->
-                <a href="javascript:void(0)" class="quest-card locked" onmouseenter="playLockedHoverSound()" onclick="triggerLockedAlert(15)">
-                    <div>
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="badge badge-locked pixel-font">LOCKED 🔒</span>
-                            <span class="text-lg opacity-60">🔒</span>
-                        </div>
-                        <h3 class="font-bold text-base text-gray-400">Week 15 - 尚未解鎖</h3>
-                        <p class="text-xs text-gray-500 mt-1 vt-font text-lg">Mission Classified</p>
-                    </div>
-                    <div class="mt-4 text-xs text-gray-600 pt-2 border-t border-gray-800">RESTRICTED ACCESS</div>
-                </a>
-
-                <!-- Week 16 -->
-                <a href="javascript:void(0)" class="quest-card locked" onmouseenter="playLockedHoverSound()" onclick="triggerLockedAlert(16)">
-                    <div>
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="badge badge-locked pixel-font">FINAL BOSS 👑</span>
-                            <span class="text-lg opacity-60">🔒</span>
-                        </div>
-                        <h3 class="font-bold text-base text-gray-400">Week 16 - 終極專案</h3>
-                        <p class="text-xs text-gray-500 mt-1 vt-font text-lg">Final Showcase</p>
-                    </div>
-                    <div class="mt-4 text-xs text-gray-600 pt-2 border-t border-gray-800">RESTRICTED ACCESS</div>
-                </a>
-
-            </div>
-        </section>
-
-        <!-- Footer Notice -->
-        <footer class="p-4 text-center border-t border-cyan-900/40 text-xs text-gray-400 vt-font text-lg">
-            © 2000-2026 WEB PORTFOLIO SYSTEM. ALL RIGHTS RESERVED. // MADE WITH Y2K POWER ⚡
-        </footer>
-    </main>
-
-    <!-- Toast Notification Message -->
-    <div id="toast" class="pixel-font text-xs flex items-center gap-2">
-        <span>🔒</span>
-        <span id="toastMsg">LEVEL LOCKED! COMPLETE PREVIOUS WEEKS FIRST.</span>
+  <!-- 主內容容器 -->
+  <div class="container">
+    <!-- 1. 載入中酷炫動畫 (預設顯示) -->
+    <div id="loading">
+      <div class="loading-bubbles">
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+      </div>
+      <div class="loading-text">讀取留言中...</div>
     </div>
 
-    <script>
-        // Audio Context Setup for 8-bit sound effects
-        let audioCtx = null;
-        let soundEnabled = true;
+    <!-- 2. 瀑布流卡片牆 -->
+    <div id="wall" class="masonry-wall"></div>
+  </div>
 
-        function initAudio() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  <script>
+    /* =========================================================
+       ⚙️【全域設定區】(可在此調校輪播頻率與資料網址)
+       ========================================================= */
+    
+    // ⏰ 1. 輪播切換間隔時間 (單位：毫秒) -> 3000ms = 3秒
+    const CAROUSEL_INTERVAL_MS = 3000; 
+
+    // 🔗 2. Google 試算表 CSV 發布網址
+    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSxyFgX1I2efq0xUtzrnSaYsNd8ZuiYlfLaiTnTLYTO0sGNt1AHoe-ibGRwzpPfRpTrhmHbvb9lvPyS/pub?output=csv';
+
+    // 🎨 3. 頭像隨機背景色彩庫
+    const AVATAR_COLORS = [
+      '#FFB7B2', '#FFDAC1', '#E2F0CB', '#B5EAD7', '#C7CEEA', '#F3D1F4', '#FCE1E4'
+    ];
+
+    let messagesData = [];
+    let currentIndex = -1;
+    let carouselTimer = null;
+
+    /* =========================================================
+       1. 健全的 CSV 解析函式 (完美處理留言內部的逗號與換行)
+       ========================================================= */
+    function parseCSV(text) {
+      const rows = [];
+      let currentRow = [];
+      let currentCell = '';
+      let insideQuotes = false;
+
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const nextChar = text[i + 1];
+
+        if (insideQuotes) {
+          if (char === '"' && nextChar === '"') {
+            currentCell += '"'; // 處理雙重雙引號 (轉義)
+            i++; 
+          } else if (char === '"') {
+            insideQuotes = false; // 離開引號區域
+          } else {
+            currentCell += char;
+          }
+        } else {
+          if (char === '"') {
+            insideQuotes = true; // 進入引號區域
+          } else if (char === ',') {
+            currentRow.push(currentCell.trim());
+            currentCell = '';
+          } else if (char === '\n' || (char === '\r' && nextChar === '\n')) {
+            currentRow.push(currentCell.trim());
+            if (currentRow.some(cell => cell.length > 0)) {
+              rows.push(currentRow);
             }
-        }
-
-        // Play synth beep tone
-        function playSynthTone(freq, type, duration, vol = 0.1) {
-            if (!soundEnabled) return;
-            try {
-                initAudio();
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                
-                osc.type = type; // 'square', 'sawtooth', 'sine'
-                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-                
-                gain.gain.setValueAtTime(vol, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
-                
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                
-                osc.start();
-                osc.stop(audioCtx.currentTime + duration);
-            } catch (e) {
-                // Audio Context fallback
+            currentRow = [];
+            currentCell = '';
+            if (char === '\r') i++; 
+          } else if (char === '\r') {
+            currentRow.push(currentCell.trim());
+            if (currentRow.some(cell => cell.length > 0)) {
+              rows.push(currentRow);
             }
+            currentRow = [];
+            currentCell = '';
+          } else {
+            currentCell += char;
+          }
+        }
+      }
+
+      if (currentCell.length > 0 || currentRow.length > 0) {
+        currentRow.push(currentCell.trim());
+        if (currentRow.some(cell => cell.length > 0)) {
+          rows.push(currentRow);
+        }
+      }
+
+      return rows;
+    }
+
+    /* =========================================================
+       2. 使用 fetch() 讀取 Google 試算表資料
+       ========================================================= */
+    async function fetchMessages() {
+      const loadingEl = document.getElementById('loading');
+
+      try {
+        const response = await fetch(CSV_URL);
+        if (!response.ok) {
+          throw new Error(`HTTP 讀取失敗，狀態碼：${response.status}`);
         }
 
-        // Sound Effects
-        function playHoverSound() {
-            playSynthTone(587.33, 'square', 0.08, 0.05); // D5 high pitch
+        const csvText = await response.text();
+        const parsedRows = parseCSV(csvText);
+
+        // CSV 預設欄位順序：[0] 時間戳記, [1] 名字, [2] 悄悄話
+        // 若發現第一列是欄位名稱（如包含「時間」），將其剔除
+        let dataRows = parsedRows;
+        if (parsedRows.length > 0 && parsedRows[0][0].includes('時間')) {
+          dataRows = parsedRows.slice(1);
         }
 
-        function playClickSound() {
-            playSynthTone(880, 'square', 0.12, 0.08); // A5
-            setTimeout(() => playSynthTone(1760, 'square', 0.15, 0.08), 60);
+        messagesData = dataRows.map(row => ({
+          timestamp: row[0] || '剛剛',
+          name: row[1] || '熱心朋友',
+          message: row[2] || '（這條留言內容空白～）'
+        }));
+
+        // 如果資料庫為空，載入預設示範資料
+        if (messagesData.length === 0) {
+          useFallbackData();
         }
 
-        function playLockedHoverSound() {
-            playSynthTone(150, 'sawtooth', 0.08, 0.04); // Low buzz
-        }
+      } catch (error) {
+        console.warn('Google 試算表載入失敗，採用備用預覽資料。原因：', error);
+        useFallbackData();
+      } finally {
+        // 隱藏「讀取留言中...」動畫，並繪製卡片牆
+        loadingEl.style.display = 'none';
+        renderCards(messagesData);
+        startCarousel();
+      }
+    }
 
-        function playErrorSound() {
-            if (!soundEnabled) return;
-            try {
-                initAudio();
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(220, audioCtx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(110, audioCtx.currentTime + 0.2);
-                gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.2);
-            } catch (e) {}
-        }
+    // 備用防護資料 (確保在網路異常或本地測試時頁面依然好看)
+    function useFallbackData() {
+      messagesData = [
+        { timestamp: '2023/10/01 10:30', name: '小明', message: '生日快樂！祝你新的一年程式都沒有 Bug，每天都開開心心！🎂' },
+        { timestamp: '2023/10/01 11:15', name: '阿傑', message: '這週週末要不要一起去喝咖啡聊聊？最近發現一家超讚的咖啡廳！☕' },
+        { timestamp: '2023/10/01 12:00', name: 'Emma', message: '謝謝你之前幫我解答前端問題，你寫的 UI 介面真的超級好看，太強了啦！✨' },
+        { timestamp: '2023/10/01 14:20', name: '神秘路人', message: '悄悄話：加油喔！你一直都很棒，繼續保持對生活的熱情吧💪' },
+        { timestamp: '2023/10/01 16:45', name: '莉莉', message: '有空記得出來聚聚，大家都很想你耶～別一直宅在家裡寫程式啦！🥳' }
+      ];
+    }
 
-        // Toggle Sound Mute
-        function toggleSound() {
-            soundEnabled = !soundEnabled;
-            const btn = document.getElementById('soundToggle');
-            btn.innerText = soundEnabled ? '🔊 SOUND: ON' : '🔇 SOUND: OFF';
-            btn.classList.toggle('text-cyan-300', soundEnabled);
-            btn.classList.toggle('text-gray-500', !soundEnabled);
-            if (soundEnabled) playClickSound();
-        }
+    /* =========================================================
+       3. 動態渲染留言卡片至 DOM
+       ========================================================= */
+    function renderCards(data) {
+      const wallEl = document.getElementById('wall');
+      wallEl.innerHTML = '';
 
-        // Toggle CRT Scanlines Filter
-        function toggleCRT() {
-            const crt = document.getElementById('crtOverlay');
-            const btn = document.getElementById('crtToggle');
-            const isVisible = crt.style.opacity !== '0';
-            
-            crt.style.opacity = isVisible ? '0' : '0.85';
-            btn.innerText = isVisible ? '📺 CRT: OFF' : '📺 CRT: ON';
-            btn.classList.toggle('text-pink-300', !isVisible);
-            btn.classList.toggle('text-gray-500', isVisible);
-            playClickSound();
-        }
+      data.forEach((item, index) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.setAttribute('data-index', index);
 
-        let toastTimeout;
-        function triggerLockedAlert(weekNum) {
-            playErrorSound();
-            const toast = document.getElementById('toast');
-            const toastMsg = document.getElementById('toastMsg');
-            
-            toastMsg.innerText = `🔒 WEEK ${weekNum} 未解鎖！請先完成前面關卡任務！`;
-            toast.classList.add('show');
-            
-            clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => {
-                toast.classList.remove('show');
-            }, 2500);
-        }
+        // 隨機選取粉彩頭像背景與擷取名字第一個字作為頭像文字
+        const randomColor = AVATAR_COLORS[index % AVATAR_COLORS.length];
+        const initial = item.name.trim().charAt(0).toUpperCase() || '👤';
 
-        // Global keypress easter egg or sound init on first click
-        window.addEventListener('click', () => {
-            initAudio();
-        }, { once: true });
-    </script>
+        card.innerHTML = `
+          <i class="fa-solid fa-quote-right quote-icon"></i>
+          <div class="card-header">
+            <div class="avatar" style="background-color: ${randomColor};">${initial}</div>
+            <div class="user-info">
+              <div class="user-name">${escapeHTML(item.name)}</div>
+              <div class="timestamp">${escapeHTML(item.timestamp)}</div>
+            </div>
+          </div>
+          <div class="card-body">${escapeHTML(item.message)}</div>
+        `;
+
+        // 支援點擊卡片：可以直接手動聚焦該留言！
+        card.addEventListener('click', () => {
+          highlightCard(index);
+          resetCarouselTimer();
+        });
+
+        wallEl.appendChild(card);
+      });
+    }
+
+    // HTML 安全轉義 (避免 XSS 攻擊)
+    function escapeHTML(str) {
+      return str.replace(/[&<>'"]/g, 
+        tag => ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          "'": '&#39;',
+          '"': '&quot;'
+        }[tag] || tag)
+      );
+    }
+
+    /* =========================================================
+       4. 輪播亮燈高亮 (Highlight) 特效邏輯
+       ========================================================= */
+    function highlightCard(index) {
+      const wallEl = document.getElementById('wall');
+      const cards = document.querySelectorAll('.card');
+
+      if (cards.length === 0) return;
+
+      // 1. 先清除所有卡片的高亮效果
+      cards.forEach(card => card.classList.remove('highlight'));
+
+      // 2. 為容器加上類別，使未獲選卡片模糊變暗
+      wallEl.classList.add('has-highlight');
+
+      // 3. 為當前目標卡片加上 highlight 高亮類別
+      const targetCard = cards[index];
+      if (targetCard) {
+        targetCard.classList.add('highlight');
+
+        // 平滑滾動讓當前聚焦的卡片維持在視線良好區域
+        targetCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      // 4. 更新頁頭狀態文字
+      const statusEl = document.getElementById('carouselStatus');
+      statusEl.innerHTML = `<i class="fa-solid fa-sparkles"></i> 展覽輪播中：第 ${index + 1} / ${cards.length} 則留言`;
+
+      currentIndex = index;
+    }
+
+    // 播放下一張卡片
+    function nextSpotlight() {
+      if (messagesData.length === 0) return;
+      const nextIndex = (currentIndex + 1) % messagesData.length;
+      highlightCard(nextIndex);
+    }
+
+    // 開啟計時器
+    function startCarousel() {
+      if (carouselTimer) clearInterval(carouselTimer);
+      
+      // 立即觸發第一張高亮
+      nextSpotlight();
+
+      // ⏱️ 使用 setInterval 每 3 秒鐘 (CAROUSEL_INTERVAL_MS) 依序亮起下一張
+      carouselTimer = setInterval(nextSpotlight, CAROUSEL_INTERVAL_MS);
+    }
+
+    // 重設計時器 (當手動點擊或滑鼠離開時)
+    function resetCarouselTimer() {
+      clearInterval(carouselTimer);
+      carouselTimer = setInterval(nextSpotlight, CAROUSEL_INTERVAL_MS);
+    }
+
+    /* 💡貼心體驗：當滑鼠移入卡片牆時，自動暫停輪播；移開後恢復輪播 */
+    const wallEl = document.getElementById('wall');
+    wallEl.addEventListener('mouseenter', () => {
+      if (carouselTimer) clearInterval(carouselTimer);
+      const statusEl = document.getElementById('carouselStatus');
+      statusEl.innerHTML = `<i class="fa-solid fa-pause"></i> 懸停閱讀中 (已暫停輪播)`;
+    });
+
+    wallEl.addEventListener('mouseleave', () => {
+      resetCarouselTimer();
+    });
+
+    // 網頁載入後立即執行
+    window.addEventListener('DOMContentLoaded', fetchMessages);
+  </script>
 </body>
 </html>
