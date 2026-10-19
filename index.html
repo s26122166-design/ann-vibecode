@@ -1,602 +1,432 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW" class="h-full">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>朋友對我的動態留言板</title>
-  
-  <!-- 引入 Google 字型 (Noto Sans TC & Fredoka) 提升休閒質感 -->
+  <title>Y2K PORTFOLIO HUB - 2026 EDITION</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
-  
-  <!-- 引入 FontAwesome 圖示庫 -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            pixel: ['"Press Start 2P"', 'monospace'],
+            vt: ['"VT323"', 'monospace'],
+            tech: ['"Share Tech Mono"', 'monospace'],
+          },
+          colors: {
+            y2k: {
+              bg: '#080514',
+              pink: '#ff007f',
+              cyan: '#00f3ff',
+              yellow: '#ffe600',
+              purple: '#8b00ff',
+              silver: '#c0c0c0',
+              darkcard: '#120d26',
+            }
+          },
+          boxShadow: {
+            'neon-pink': '0 0 15px rgba(255, 0, 127, 0.6), inset 0 0 10px rgba(255, 0, 127, 0.4)',
+            'neon-cyan': '0 0 15px rgba(0, 243, 255, 0.6), inset 0 0 10px rgba(0, 243, 255, 0.4)',
+            'neon-yellow': '0 0 15px rgba(255, 230, 0, 0.6), inset 0 0 10px rgba(255, 230, 0, 0.4)',
+          }
+        }
+      }
+    }
+  </script>
 
   <style>
-    /* =========================================================
-       🎨【色彩與主題控制區 (CSS Variables)】
-       若想更換主題配色，可直接在這裡修改顏色碼！
-       ========================================================= */
-    :root {
-      /* 頁面背景：溫暖奶油舒壓漸層色 */
-      --bg-gradient-start: #FFF9F3;
-      --bg-gradient-end: #F3E9DD;
-      
-      /* 文字主要與次要顏色 */
-      --text-main: #4A3E3D;
-      --text-sub: #8C7A78;
-
-      /* 一般卡片背景與柔和陰影 */
-      --card-bg: #FFFFFF;
-      --card-shadow: 0 10px 25px rgba(140, 122, 120, 0.08);
-
-      /* 💡【亮燈聚焦特效控制區】 */
-      --highlight-border: #FF7E5F;         /* 聚焦卡片的亮邊框顏色 (暖珊瑚橘) */
-      --highlight-glow: rgba(255, 126, 95, 0.4); /* 聚焦卡片的發光暈影 */
-      --highlight-badge: #FF6B6B;        /* 聚焦標籤背景色 */
-
-      /* 隨機頭像粉彩配色庫 (Pastel Palette) */
-      --avatar-color-1: #FFB7B2;
-      --avatar-color-2: #FFDAC1;
-      --avatar-color-3: #E2F0CB;
-      --avatar-color-4: #B5EAD7;
-      --avatar-color-5: #C7CEEA;
+    /* Background Grid Pattern */
+    .cyber-grid {
+      background-size: 40px 40px;
+      background-image: 
+        linear-gradient(to right, rgba(0, 243, 255, 0.08) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 0, 127, 0.08) 1px, transparent 1px);
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+    /* CRT Scanline Overlay */
+    .crt-overlay::before {
+      content: " ";
+      display: block;
+      position: fixed;
+      top: 0; left: 0; bottom: 0; right: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+      z-index: 100;
+      background-size: 100% 4px, 6px 100%;
+      pointer-events: none;
     }
 
-    body {
-      font-family: 'Noto Sans TC', sans-serif;
-      background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
-      color: var(--text-main);
-      min-height: 100vh;
-      padding: 2.5rem 1rem 4rem 1rem;
+    /* Glitch Animation */
+    @keyframes glitch {
+      0% { text-shadow: 2px 0 #ff007f, -2px 0 #00f3ff; }
+      25% { text-shadow: -2px 0 #ff007f, 2px 0 #00f3ff; }
+      50% { text-shadow: 1px -1px #ff007f, -1px 1px #00f3ff; }
+      75% { text-shadow: -2px 1px #ff007f, 2px -1px #00f3ff; }
+      100% { text-shadow: 2px 0 #ff007f, -2px 0 #00f3ff; }
+    }
+    .glitch-text {
+      animation: glitch 2.5s infinite alternate;
     }
 
-    /* 頁面標題區域 */
-    header {
-      text-align: center;
-      margin-bottom: 2.5rem;
+    /* Shake Animation for Locked Levels */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-6px) rotate(-1.5deg); }
+      40% { transform: translateX(6px) rotate(1.5deg); }
+      60% { transform: translateX(-4px); }
+      80% { transform: translateX(4px); }
+    }
+    .animate-shake {
+      animation: shake 0.35s ease-in-out;
     }
 
-    header h1 {
-      font-family: 'Fredoka', 'Noto Sans TC', sans-serif;
-      font-size: 2.2rem;
-      color: #3D3130;
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 0.5rem;
-    }
-
-    header p {
-      color: var(--text-sub);
-      font-size: 1rem;
-    }
-
-    /* 狀態顯示列 (顯示目前輪播狀態) */
-    .status-bar {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 12px;
-      margin-top: 1rem;
-    }
-
-    .status-badge {
-      background: rgba(255, 255, 255, 0.85);
-      padding: 6px 18px;
-      border-radius: 20px;
-      font-size: 0.9rem;
-      color: var(--text-sub);
-      box-shadow: 0 2px 10px rgba(0,0,0,0.04);
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .status-badge i {
-      color: var(--highlight-border);
-      animation: pulse 1.5s infinite;
-    }
-
-    @keyframes pulse {
-      0% { opacity: 0.4; }
-      50% { opacity: 1; }
-      100% { opacity: 0.4; }
-    }
-
-    /* 主容器 */
-    .container {
-      max-width: 1100px;
-      margin: 0 auto;
-    }
-
-    /* =========================================================
-       🌀【載入中動畫效果】(Loading Animation)
-       ========================================================= */
-    #loading {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 5rem 0;
-      gap: 1.2rem;
-    }
-
-    .loading-bubbles {
-      display: flex;
-      gap: 10px;
-    }
-
-    .bubble {
-      width: 16px;
-      height: 16px;
-      background-color: var(--highlight-border);
-      border-radius: 50%;
-      animation: bounce 1.4s infinite ease-in-out both;
-    }
-
-    .bubble:nth-child(1) { animation-delay: -0.32s; }
-    .bubble:nth-child(2) { animation-delay: -0.16s; }
-
-    @keyframes bounce {
-      0%, 80%, 100% { transform: scale(0); }
-      40% { transform: scale(1.0); }
-    }
-
-    .loading-text {
-      font-size: 1.1rem;
-      font-weight: 500;
-      color: var(--text-sub);
-      letter-spacing: 1px;
-    }
-
-    /* =========================================================
-       🧱【瀑布流排版 (Masonry Layout)】
-       ========================================================= */
-    .masonry-wall {
-      /* 桌機預設 3 欄 */
-      column-count: 3;
-      column-gap: 1.8rem;
-      width: 100%;
-      transition: filter 0.5s ease;
-    }
-
-    /* 平板調整為 2 欄 */
-    @media (max-width: 900px) {
-      .masonry-wall {
-        column-count: 2;
-        column-gap: 1.2rem;
-      }
-    }
-
-    /* 手機調整為 1 欄 */
-    @media (max-width: 600px) {
-      .masonry-wall {
-        column-count: 1;
-      }
-    }
-
-    /* =========================================================
-       💌【留言卡片基礎樣式】
-       ========================================================= */
-    .card {
-      /* 關鍵設定：防止卡片在瀑布流欄位間被拆斷 */
-      break-inside: avoid;
-      page-break-inside: avoid;
-      -webkit-column-break-inside: avoid;
-
-      background: var(--card-bg);
-      border-radius: 20px;
-      padding: 1.5rem;
-      margin-bottom: 1.8rem;
-      box-shadow: var(--card-shadow);
+    /* Holographic Border Gradient */
+    .holo-border {
       border: 2px solid transparent;
-      position: relative;
-
-      /* 平滑視覺轉換 (轉場靈魂) */
-      transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
-      cursor: pointer;
+      border-image: linear-gradient(135deg, #00f3ff, #ff007f, #ffe600) 1;
     }
 
-    /* 卡片頭部：頭像 + 名字 + 時間 */
-    .card-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 1rem;
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
     }
-
-    .avatar {
-      width: 44px;
-      height: 44px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 1.15rem;
-      color: #555;
-      flex-shrink: 0;
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
+    ::-webkit-scrollbar-track {
+      background: #080514;
     }
-
-    .user-info {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .user-name {
-      font-weight: 700;
-      font-size: 1.05rem;
-      color: var(--text-main);
-    }
-
-    .timestamp {
-      font-size: 0.78rem;
-      color: var(--text-sub);
-      margin-top: 2px;
-    }
-
-    /* 卡片內文區域 */
-    .card-body {
-      font-size: 0.98rem;
-      line-height: 1.65;
-      color: #5A4E4D;
-      white-space: pre-wrap; /* 保留留言換行與空格 */
-      word-break: break-word;
-    }
-
-    /* 右上角可愛引號圖示 */
-    .quote-icon {
-      position: absolute;
-      top: 1.2rem;
-      right: 1.2rem;
-      font-size: 1.3rem;
-      color: #F0E6DF;
-      transition: color 0.5s ease;
-    }
-
-    /* =========================================================
-       ✨【隨時間輪播：高亮亮燈 (Highlight) 特效】
-       ========================================================= */
-    /* 被選中的卡片：放大、亮起發光、突顯層級 */
-    .card.highlight {
-      transform: scale(1.06) translateY(-6px);
-      border-color: var(--highlight-border);
-      box-shadow: 0 16px 38px var(--highlight-glow);
-      z-index: 10;
-      opacity: 1 !important;
-      filter: blur(0px) !important;
-    }
-
-    .card.highlight .quote-icon {
-      color: var(--highlight-border);
-    }
-
-    /* 高亮時右上角自動出現的亮眼小標籤 */
-    .card.highlight::after {
-      content: "✨ Spotlight";
-      position: absolute;
-      top: -12px;
-      right: 20px;
-      background: var(--highlight-badge);
-      color: white;
-      font-size: 0.75rem;
-      font-weight: bold;
-      padding: 3px 10px;
-      border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-      animation: popIn 0.4s ease;
-    }
-
-    @keyframes popIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* 當有卡片高亮時，其他未選中的卡片稍微變暗、變模糊 */
-    .masonry-wall.has-highlight .card:not(.highlight) {
-      opacity: 0.42;
-      filter: blur(1.2px) grayscale(15%);
-      transform: scale(0.96);
-    }
-
-    /* 滑鼠懸停於卡片時微幅抬升 */
-    .card:hover {
-      transform: translateY(-4px);
+    ::-webkit-scrollbar-thumb {
+      background: #ff007f;
+      border-radius: 4px;
     }
   </style>
 </head>
-<body>
+<body class="bg-y2k-bg text-white font-tech h-full min-h-screen cyber-grid relative crt-overlay select-none flex flex-col justify-between overflow-x-hidden">
 
-  <!-- 頁頭標題區 -->
-  <header>
-    <h1><i class="fa-solid fa-heart-pulse"></i> 朋友對我的動態留言板</h1>
-    <p>隨時間輪流播放朋友給我的暖心話語 💭</p>
-    <div class="status-bar">
-      <div class="status-badge" id="carouselStatus">
-        <i class="fa-solid fa-sparkles"></i> 準備播放留言中...
-      </div>
+  <!-- Header & Control Bar -->
+  <header class="w-full p-4 border-b-2 border-y2k-pink/50 bg-black/60 backdrop-blur-md sticky top-0 z-50 flex justify-between items-center px-6">
+    <div class="flex items-center space-x-3">
+      <span class="inline-block w-3 h-3 rounded-full bg-y2k-pink animate-ping"></span>
+      <h1 class="font-pixel text-xs md:text-sm text-y2k-cyan tracking-wider uppercase glitch-text">
+        SYSTEM v2.0.26 // PORTFOLIO
+      </h1>
+    </div>
+
+    <!-- Controls: CRT & Sound Toggles -->
+    <div class="flex items-center space-x-3 text-xs">
+      <button id="audio-toggle" class="px-3 py-1 bg-y2k-darkcard border border-y2k-cyan text-y2k-cyan hover:bg-y2k-cyan hover:text-black transition-all rounded font-pixel flex items-center gap-1">
+        🔊 <span id="audio-status">SFX: ON</span>
+      </button>
+      <button id="crt-toggle" class="px-3 py-1 bg-y2k-darkcard border border-y2k-pink text-y2k-pink hover:bg-y2k-pink hover:text-black transition-all rounded font-pixel flex items-center gap-1">
+        📺 <span id="crt-status">CRT: ON</span>
+      </button>
     </div>
   </header>
 
-  <!-- 主內容容器 -->
-  <div class="container">
-    <!-- 1. 載入中酷炫動畫 (預設顯示) -->
-    <div id="loading">
-      <div class="loading-bubbles">
-        <div class="bubble"></div>
-        <div class="bubble"></div>
-        <div class="bubble"></div>
+  <!-- Main Content Container -->
+  <main class="container mx-auto px-4 py-8 max-w-5xl flex-grow flex flex-col items-center justify-center">
+
+    <!-- Profile Section (Center) -->
+    <section class="w-full max-w-xl bg-y2k-darkcard/90 border-2 border-y2k-cyan p-6 rounded-2xl shadow-neon-cyan mb-10 text-center relative backdrop-blur-md transform transition-transform hover:scale-[1.01]">
+      
+      <!-- Decorative Corner Accents -->
+      <div class="absolute -top-2 -left-2 w-4 h-4 border-t-2 border-l-2 border-y2k-yellow"></div>
+      <div class="absolute -top-2 -right-2 w-4 h-4 border-t-2 border-r-2 border-y2k-yellow"></div>
+      <div class="absolute -bottom-2 -left-2 w-4 h-4 border-b-2 border-l-2 border-y2k-yellow"></div>
+      <div class="absolute -bottom-2 -right-2 w-4 h-4 border-b-2 border-r-2 border-y2k-yellow"></div>
+
+      <!-- Avatar with Pulsing Hologram Glow -->
+      <div class="relative w-28 h-28 mx-auto mb-4 group">
+        <div class="absolute inset-0 rounded-full bg-gradient-to-r from-y2k-pink via-y2k-yellow to-y2k-cyan blur-md opacity-75 group-hover:opacity-100 animate-spin" style="animation-duration: 8s;"></div>
+        <img 
+          src="https://api.dicebear.com/7.x/pixel-art/svg?seed=CyberPlayer2026&backgroundColor=0b091a" 
+          alt="Avatar" 
+          class="relative w-full h-full rounded-full border-2 border-y2k-cyan bg-black object-cover p-1"
+          onerror="this.src='https://placehold.co/120x120/120d26/00f3ff?text=AVATAR'"
+        />
+        <span class="absolute bottom-1 right-1 bg-y2k-pink text-black text-[10px] font-pixel px-1.5 py-0.5 rounded-full border border-white">LVL.4</span>
       </div>
-      <div class="loading-text">讀取留言中...</div>
+
+      <!-- Player Name -->
+      <h2 class="text-2xl md:text-3xl font-pixel text-y2k-yellow tracking-widest mb-1 drop-shadow-[0_2px_4px_rgba(255,230,0,0.5)]">
+        PLAYER_ONE
+      </h2>
+      <p class="text-xs text-y2k-cyan font-tech tracking-wider uppercase mb-4">
+        &lt; FRONTEND CYBER DEVELOPER / CREATOR &gt;
+      </p>
+
+      <!-- Status Bar Panel -->
+      <div class="bg-black/80 border border-y2k-pink/60 p-4 rounded-xl text-left space-y-2">
+        <div class="flex justify-between items-center text-xs font-pixel">
+          <span class="text-y2k-pink flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-y2k-pink animate-pulse"></span>
+            STATUS: ONLINE
+          </span>
+          <span class="text-y2k-yellow font-bold">COMPLETED: 4 / 16</span>
+        </div>
+
+        <!-- Progress Bar (4/16 = 25%) -->
+        <div class="w-full h-4 bg-y2k-darkcard border border-y2k-cyan/50 rounded-full p-0.5 relative overflow-hidden">
+          <div class="h-full bg-gradient-to-r from-y2k-cyan via-y2k-pink to-y2k-yellow rounded-full transition-all duration-1000 shadow-[0_0_10px_#00f3ff]" style="width: 25%;"></div>
+        </div>
+
+        <div class="flex justify-between text-[11px] text-gray-400 font-tech">
+          <span>PROGRESS: 25%</span>
+          <span>NEXT: WEEK 5 (LOCKED)</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Notification Toast Box -->
+    <div id="toast" class="opacity-0 transition-opacity duration-300 fixed top-20 right-6 z-50 bg-red-900/90 border-2 border-red-500 text-red-200 px-4 py-2 rounded-lg shadow-lg font-pixel text-xs flex items-center gap-2 pointer-events-none">
+      <span>⚠️</span> <span id="toast-msg">ACCESS DENIED</span>
     </div>
 
-    <!-- 2. 瀑布流卡片牆 -->
-    <div id="wall" class="masonry-wall"></div>
-  </div>
+    <!-- Level Cards Grid (4x4 Matrix) -->
+    <section class="w-full">
+      <div class="flex items-center justify-between mb-4 px-2">
+        <h3 class="font-pixel text-sm text-y2k-cyan uppercase flex items-center gap-2">
+          <span>⚡</span> STAGE SELECT (16 WEEKS)
+        </h3>
+        <span class="text-xs text-y2k-pink font-vt text-base">SELECT A LEVEL TO LAUNCH</span>
+      </div>
 
+      <!-- Grid Container -->
+      <div id="grid-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Level Cards dynamically injected via JavaScript -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="w-full border-t border-y2k-pink/30 bg-black/80 py-4 text-center text-xs text-gray-500 font-vt text-lg mt-8">
+    <p>Y2K PORTFOLIO SYSTEM © 2026 // ALL RIGHTS RESERVED</p>
+  </footer>
+
+  <!-- JavaScript Code -->
   <script>
-    /* =========================================================
-       ⚙️【全域設定區】(可在此調校輪播頻率與資料網址)
-       ========================================================= */
-    
-    // ⏰ 1. 輪播切換間隔時間 (單位：毫秒) -> 3000ms = 3秒
-    const CAROUSEL_INTERVAL_MS = 3000; 
+    // Audio Context Setup for 8-bit Sound Effects
+    let audioCtx = null;
+    let sfxEnabled = true;
 
-    // 🔗 2. Google 試算表 CSV 發布網址
-    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSxyFgX1I2efq0xUtzrnSaYsNd8ZuiYlfLaiTnTLYTO0sGNt1AHoe-ibGRwzpPfRpTrhmHbvb9lvPyS/pub?output=csv';
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
 
-    // 🎨 3. 頭像隨機背景色彩庫
-    const AVATAR_COLORS = [
-      '#FFB7B2', '#FFDAC1', '#E2F0CB', '#B5EAD7', '#C7CEEA', '#F3D1F4', '#FCE1E4'
+    // Play synthesized hover beep sound
+    function playHoverSound() {
+      if (!sfxEnabled) return;
+      try {
+        initAudio();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.05);
+        gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.05);
+      } catch (e) {}
+    }
+
+    // Play synthesized click success sound
+    function playClickSound() {
+      if (!sfxEnabled) return;
+      try {
+        initAudio();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(440, audioCtx.currentTime);
+        osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.08);
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.2);
+      } catch (e) {}
+    }
+
+    // Play synthesized locked error sound
+    function playLockedSound() {
+      if (!sfxEnabled) return;
+      try {
+        initAudio();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+        osc.frequency.setValueAtTime(110, audioCtx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.25);
+      } catch (e) {}
+    }
+
+    // Data for 16 Stages
+    const levelsData = [
+      { week: 1, title: "Week 1 - 數位名片", url: "w1/index.html", unlocked: true },
+      { week: 2, title: "Week 2 - 今天吃甚麼?", url: "w2/index.html", unlocked: true },
+      { week: 3, title: "Week 3 - 課堂作業 3", url: "w3/index.html", unlocked: true },
+      { week: 4, title: "Week 4 - 課堂作業 4", url: "w4/index.html", unlocked: true },
+      { week: 5, title: "Week 5 - 課堂作業 5", url: "w5/index.html", unlocked: false },
+      { week: 6, title: "Week 6 - 課堂作業 6", url: "w6/index.html", unlocked: false },
+      { week: 7, title: "Week 7 - 課堂作業 7", url: "w7/index.html", unlocked: false },
+      { week: 8, title: "Week 8 - 期中專案", url: "w8/index.html", unlocked: false },
+      { week: 9, title: "Week 9 - 課堂作業 9", url: "w9/index.html", unlocked: false },
+      { week: 10, title: "Week 10 - 課堂作業 10", url: "w10/index.html", unlocked: false },
+      { week: 11, title: "Week 11 - 課堂作業 11", url: "w11/index.html", unlocked: false },
+      { week: 12, title: "Week 12 - 課堂作業 12", url: "w12/index.html", unlocked: false },
+      { week: 13, title: "Week 13 - 課堂作業 13", url: "w13/index.html", unlocked: false },
+      { week: 14, title: "Week 14 - 課堂作業 14", url: "w14/index.html", unlocked: false },
+      { week: 15, title: "Week 15 - 課堂作業 15", url: "w15/index.html", unlocked: false },
+      { week: 16, title: "Week 16 - 期末專案", url: "w16/index.html", unlocked: false },
     ];
 
-    let messagesData = [];
-    let currentIndex = -1;
-    let carouselTimer = null;
-
-    /* =========================================================
-       1. 健全的 CSV 解析函式 (完美處理留言內部的逗號與換行)
-       ========================================================= */
-    function parseCSV(text) {
-      const rows = [];
-      let currentRow = [];
-      let currentCell = '';
-      let insideQuotes = false;
-
-      for (let i = 0; i < text.length; i++) {
-        const char = text[i];
-        const nextChar = text[i + 1];
-
-        if (insideQuotes) {
-          if (char === '"' && nextChar === '"') {
-            currentCell += '"'; // 處理雙重雙引號 (轉義)
-            i++; 
-          } else if (char === '"') {
-            insideQuotes = false; // 離開引號區域
-          } else {
-            currentCell += char;
-          }
-        } else {
-          if (char === '"') {
-            insideQuotes = true; // 進入引號區域
-          } else if (char === ',') {
-            currentRow.push(currentCell.trim());
-            currentCell = '';
-          } else if (char === '\n' || (char === '\r' && nextChar === '\n')) {
-            currentRow.push(currentCell.trim());
-            if (currentRow.some(cell => cell.length > 0)) {
-              rows.push(currentRow);
-            }
-            currentRow = [];
-            currentCell = '';
-            if (char === '\r') i++; 
-          } else if (char === '\r') {
-            currentRow.push(currentCell.trim());
-            if (currentRow.some(cell => cell.length > 0)) {
-              rows.push(currentRow);
-            }
-            currentRow = [];
-            currentCell = '';
-          } else {
-            currentCell += char;
-          }
-        }
-      }
-
-      if (currentCell.length > 0 || currentRow.length > 0) {
-        currentRow.push(currentCell.trim());
-        if (currentRow.some(cell => cell.length > 0)) {
-          rows.push(currentRow);
-        }
-      }
-
-      return rows;
+    // Show Notification Toast
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-msg');
+      toastMsg.innerText = msg;
+      toast.classList.remove('opacity-0');
+      toast.classList.add('opacity-100');
+      setTimeout(() => {
+        toast.classList.remove('opacity-100');
+        toast.classList.add('opacity-0');
+      }, 2000);
     }
 
-    /* =========================================================
-       2. 使用 fetch() 讀取 Google 試算表資料
-       ========================================================= */
-    async function fetchMessages() {
-      const loadingEl = document.getElementById('loading');
+    // Render Stage Cards
+    function renderGrid() {
+      const grid = document.getElementById('grid-container');
+      grid.innerHTML = '';
 
-      try {
-        const response = await fetch(CSV_URL);
-        if (!response.ok) {
-          throw new Error(`HTTP 讀取失敗，狀態碼：${response.status}`);
-        }
-
-        const csvText = await response.text();
-        const parsedRows = parseCSV(csvText);
-
-        // CSV 預設欄位順序：[0] 時間戳記, [1] 名字, [2] 悄悄話
-        // 若發現第一列是欄位名稱（如包含「時間」），將其剔除
-        let dataRows = parsedRows;
-        if (parsedRows.length > 0 && parsedRows[0][0].includes('時間')) {
-          dataRows = parsedRows.slice(1);
-        }
-
-        messagesData = dataRows.map(row => ({
-          timestamp: row[0] || '剛剛',
-          name: row[1] || '熱心朋友',
-          message: row[2] || '（這條留言內容空白～）'
-        }));
-
-        // 如果資料庫為空，載入預設示範資料
-        if (messagesData.length === 0) {
-          useFallbackData();
-        }
-
-      } catch (error) {
-        console.warn('Google 試算表載入失敗，採用備用預覽資料。原因：', error);
-        useFallbackData();
-      } finally {
-        // 隱藏「讀取留言中...」動畫，並繪製卡片牆
-        loadingEl.style.display = 'none';
-        renderCards(messagesData);
-        startCarousel();
-      }
-    }
-
-    // 備用防護資料 (確保在網路異常或本地測試時頁面依然好看)
-    function useFallbackData() {
-      messagesData = [
-        { timestamp: '2023/10/01 10:30', name: '小明', message: '生日快樂！祝你新的一年程式都沒有 Bug，每天都開開心心！🎂' },
-        { timestamp: '2023/10/01 11:15', name: '阿傑', message: '這週週末要不要一起去喝咖啡聊聊？最近發現一家超讚的咖啡廳！☕' },
-        { timestamp: '2023/10/01 12:00', name: 'Emma', message: '謝謝你之前幫我解答前端問題，你寫的 UI 介面真的超級好看，太強了啦！✨' },
-        { timestamp: '2023/10/01 14:20', name: '神秘路人', message: '悄悄話：加油喔！你一直都很棒，繼續保持對生活的熱情吧💪' },
-        { timestamp: '2023/10/01 16:45', name: '莉莉', message: '有空記得出來聚聚，大家都很想你耶～別一直宅在家裡寫程式啦！🥳' }
-      ];
-    }
-
-    /* =========================================================
-       3. 動態渲染留言卡片至 DOM
-       ========================================================= */
-    function renderCards(data) {
-      const wallEl = document.getElementById('wall');
-      wallEl.innerHTML = '';
-
-      data.forEach((item, index) => {
+      levelsData.forEach(level => {
         const card = document.createElement('div');
-        card.className = 'card';
-        card.setAttribute('data-index', index);
+        
+        if (level.unlocked) {
+          // Unlocked Card Styling
+          card.className = `
+            relative bg-y2k-darkcard/80 border-2 border-y2k-cyan p-4 rounded-xl 
+            shadow-[0_0_10px_rgba(0,243,255,0.2)] hover:shadow-neon-cyan hover:border-y2k-yellow 
+            transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 
+            cursor-pointer flex flex-col justify-between h-36 group backdrop-blur-sm
+          `;
 
-        // 隨機選取粉彩頭像背景與擷取名字第一個字作為頭像文字
-        const randomColor = AVATAR_COLORS[index % AVATAR_COLORS.length];
-        const initial = item.name.trim().charAt(0).toUpperCase() || '👤';
-
-        card.innerHTML = `
-          <i class="fa-solid fa-quote-right quote-icon"></i>
-          <div class="card-header">
-            <div class="avatar" style="background-color: ${randomColor};">${initial}</div>
-            <div class="user-info">
-              <div class="user-name">${escapeHTML(item.name)}</div>
-              <div class="timestamp">${escapeHTML(item.timestamp)}</div>
+          card.innerHTML = `
+            <div class="flex justify-between items-start">
+              <span class="font-pixel text-xs text-y2k-yellow bg-black/60 px-2 py-1 rounded border border-y2k-yellow/40">
+                W${level.week}
+              </span>
+              <span class="text-xs bg-y2k-cyan text-black font-pixel px-1.5 py-0.5 rounded font-bold">
+                OPEN
+              </span>
             </div>
-          </div>
-          <div class="card-body">${escapeHTML(item.message)}</div>
-        `;
+            
+            <div class="my-2">
+              <h4 class="font-tech text-base text-white font-bold group-hover:text-y2k-cyan transition-colors line-clamp-2">
+                ${level.title}
+              </h4>
+            </div>
 
-        // 支援點擊卡片：可以直接手動聚焦該留言！
-        card.addEventListener('click', () => {
-          highlightCard(index);
-          resetCarouselTimer();
-        });
+            <div class="flex justify-between items-center text-[10px] text-y2k-cyan/80 font-pixel">
+              <span>[CLEAR]</span>
+              <span class="group-hover:translate-x-1 transition-transform">LAUNCH ▶</span>
+            </div>
+          `;
 
-        wallEl.appendChild(card);
+          card.addEventListener('mouseenter', () => playHoverSound());
+          card.addEventListener('click', () => {
+            playClickSound();
+            setTimeout(() => {
+              window.location.href = level.url;
+            }, 150);
+          });
+
+        } else {
+          // Locked Card Styling
+          card.className = `
+            relative bg-gray-900/40 border border-gray-700/60 p-4 rounded-xl 
+            opacity-60 hover:opacity-90 transition-all duration-200 
+            cursor-not-allowed flex flex-col justify-between h-36 backdrop-blur-sm group select-none
+          `;
+
+          card.innerHTML = `
+            <div class="flex justify-between items-start">
+              <span class="font-pixel text-xs text-gray-500 bg-black/50 px-2 py-1 rounded">
+                W${level.week}
+              </span>
+              <span class="text-sm">🔒</span>
+            </div>
+
+            <div class="my-2">
+              <h4 class="font-tech text-sm text-gray-400 font-medium">
+                ${level.title}
+              </h4>
+            </div>
+
+            <div class="flex justify-between items-center text-[10px] text-gray-500 font-pixel">
+              <span>STATUS: LOCKED</span>
+              <span class="text-red-400">DENIED</span>
+            </div>
+          `;
+
+          // Hover Warning & Shake
+          card.addEventListener('mouseenter', () => {
+            playLockedSound();
+            card.classList.add('animate-shake', 'border-red-500/80');
+            setTimeout(() => card.classList.remove('animate-shake', 'border-red-500/80'), 350);
+          });
+
+          // Click Warning
+          card.addEventListener('click', (e) => {
+            e.preventDefault();
+            playLockedSound();
+            card.classList.add('animate-shake', 'border-red-500');
+            showToast(`SYSTEM LOCKED: W${level.week} ACCESS DENIED`);
+            setTimeout(() => card.classList.remove('animate-shake', 'border-red-500'), 350);
+          });
+        }
+
+        grid.appendChild(card);
       });
     }
 
-    // HTML 安全轉義 (避免 XSS 攻擊)
-    function escapeHTML(str) {
-      return str.replace(/[&<>'"]/g, 
-        tag => ({
-          '&': '&amp;',
-          '<': '&lt;',
-          '>': '&gt;',
-          "'": '&#39;',
-          '"': '&quot;'
-        }[tag] || tag)
-      );
-    }
-
-    /* =========================================================
-       4. 輪播亮燈高亮 (Highlight) 特效邏輯
-       ========================================================= */
-    function highlightCard(index) {
-      const wallEl = document.getElementById('wall');
-      const cards = document.querySelectorAll('.card');
-
-      if (cards.length === 0) return;
-
-      // 1. 先清除所有卡片的高亮效果
-      cards.forEach(card => card.classList.remove('highlight'));
-
-      // 2. 為容器加上類別，使未獲選卡片模糊變暗
-      wallEl.classList.add('has-highlight');
-
-      // 3. 為當前目標卡片加上 highlight 高亮類別
-      const targetCard = cards[index];
-      if (targetCard) {
-        targetCard.classList.add('highlight');
-
-        // 平滑滾動讓當前聚焦的卡片維持在視線良好區域
-        targetCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }
-
-      // 4. 更新頁頭狀態文字
-      const statusEl = document.getElementById('carouselStatus');
-      statusEl.innerHTML = `<i class="fa-solid fa-sparkles"></i> 展覽輪播中：第 ${index + 1} / ${cards.length} 則留言`;
-
-      currentIndex = index;
-    }
-
-    // 播放下一張卡片
-    function nextSpotlight() {
-      if (messagesData.length === 0) return;
-      const nextIndex = (currentIndex + 1) % messagesData.length;
-      highlightCard(nextIndex);
-    }
-
-    // 開啟計時器
-    function startCarousel() {
-      if (carouselTimer) clearInterval(carouselTimer);
-      
-      // 立即觸發第一張高亮
-      nextSpotlight();
-
-      // ⏱️ 使用 setInterval 每 3 秒鐘 (CAROUSEL_INTERVAL_MS) 依序亮起下一張
-      carouselTimer = setInterval(nextSpotlight, CAROUSEL_INTERVAL_MS);
-    }
-
-    // 重設計時器 (當手動點擊或滑鼠離開時)
-    function resetCarouselTimer() {
-      clearInterval(carouselTimer);
-      carouselTimer = setInterval(nextSpotlight, CAROUSEL_INTERVAL_MS);
-    }
-
-    /* 💡貼心體驗：當滑鼠移入卡片牆時，自動暫停輪播；移開後恢復輪播 */
-    const wallEl = document.getElementById('wall');
-    wallEl.addEventListener('mouseenter', () => {
-      if (carouselTimer) clearInterval(carouselTimer);
-      const statusEl = document.getElementById('carouselStatus');
-      statusEl.innerHTML = `<i class="fa-solid fa-pause"></i> 懸停閱讀中 (已暫停輪播)`;
+    // Toggle CRT Scanlines
+    document.getElementById('crt-toggle').addEventListener('click', () => {
+      document.body.classList.toggle('crt-overlay');
+      const crtStatus = document.getElementById('crt-status');
+      const isCrt = document.body.classList.contains('crt-overlay');
+      crtStatus.innerText = isCrt ? 'CRT: ON' : 'CRT: OFF';
+      playClickSound();
     });
 
-    wallEl.addEventListener('mouseleave', () => {
-      resetCarouselTimer();
+    // Toggle Audio Effects
+    document.getElementById('audio-toggle').addEventListener('click', () => {
+      sfxEnabled = !sfxEnabled;
+      const audioStatus = document.getElementById('audio-status');
+      audioStatus.innerText = sfxEnabled ? 'SFX: ON' : 'SFX: OFF';
+      if (sfxEnabled) playClickSound();
     });
 
-    // 網頁載入後立即執行
-    window.addEventListener('DOMContentLoaded', fetchMessages);
+    // Initialize Page
+    window.addEventListener('DOMContentLoaded', () => {
+      renderGrid();
+    });
   </script>
 </body>
 </html>
