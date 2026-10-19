@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>今天吃什麼？抽籤機</title>
+    <!-- 引入 CSS 樣式表 -->
+    <link rel="stylesheet" href="style.css">
+    <!-- 引入 JavaScript，使用 defer 確保網頁載入後才執行 -->
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <div class="container">
+        <!-- 抽籤結果與標題 -->
+        <h1 id="resultTitle">今天吃什麼？</h1>
+        
+        <!-- 顯示餐點圖片（預設先隱藏） -->
+        <img id="resultImage" src="" alt="餐點圖片" style="display: none;">
+        
+        <!-- 按鈕區塊 -->
+        <div class="button-group">
+            <button id="drawButton">點我抽籤</button>
+            <!-- 導向 Google Map 的連結按鈕（預設先隱藏） -->
+            <a id="mapLink" href="#" target="_blank" style="display: none;">馬上出發！</a>
+        </div>
+    </div>
+</body>
+</html>
