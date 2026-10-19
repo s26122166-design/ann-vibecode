@@ -3,38 +3,37 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Y2K PORTFOLIO HUB - 2026 EDITION</title>
+  <title>阮紅安的日常作品集 - 2026</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 
   <script>
     tailwind.config = {
       theme: {
         extend: {
           fontFamily: {
-            pixel: ['"Press Start 2P"', 'monospace'],
-            vt: ['"VT323"', 'monospace'],
-            tech: ['"Share Tech Mono"', 'monospace'],
+            sans: ['"M PLUS Rounded 1c"', '"Noto Sans TC"', 'sans-serif'],
           },
           colors: {
-            y2k: {
-              bg: '#080514',
-              pink: '#ff007f',
-              cyan: '#00f3ff',
-              yellow: '#ffe600',
-              purple: '#8b00ff',
-              silver: '#c0c0c0',
-              darkcard: '#120d26',
+            cozy: {
+              bg: '#f7f5f0',          /* 暖米色背景 */
+              card: '#ffffff',        /* 卡片白 */
+              border: '#e6dfd5',      /* 柔和邊框色 */
+              primary: '#6b8e23',     /* 橄欖綠 */
+              secondary: '#d4a373',   /* 奶茶棕 */
+              accent: '#faedcd',      /* 柔黃色 */
+              text: '#4a403a',        /* 咖啡深灰文字 */
+              muted: '#8c827b',       /* 次要文字 */
+              tag: '#e9edc9',         /* 淺綠標籤 */
             }
           },
           boxShadow: {
-            'neon-pink': '0 0 15px rgba(255, 0, 127, 0.6), inset 0 0 10px rgba(255, 0, 127, 0.4)',
-            'neon-cyan': '0 0 15px rgba(0, 243, 255, 0.6), inset 0 0 10px rgba(0, 243, 255, 0.4)',
-            'neon-yellow': '0 0 15px rgba(255, 230, 0, 0.6), inset 0 0 10px rgba(255, 230, 0, 0.4)',
+            'cozy': '0 4px 20px -2px rgba(212, 163, 115, 0.15)',
+            'cozy-hover': '0 8px 25px -4px rgba(107, 142, 35, 0.25)',
           }
         }
       }
@@ -42,87 +41,54 @@
   </script>
 
   <style>
-    /* Background Grid Pattern */
-    .cyber-grid {
-      background-size: 40px 40px;
-      background-image: 
-        linear-gradient(to right, rgba(0, 243, 255, 0.08) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(255, 0, 127, 0.08) 1px, transparent 1px);
+    /* 溫馨背景圓點紋理 */
+    .cozy-pattern {
+      background-image: radial-gradient(#d4a373 0.75px, transparent 0.75px), radial-gradient(#d4a373 0.75px, #f7f5f0 0.75px);
+      background-size: 30px 30px;
+      background-position: 0 0, 15px 15px;
+      background-color: #f7f5f0;
     }
 
-    /* CRT Scanline Overlay */
-    .crt-overlay::before {
-      content: " ";
-      display: block;
-      position: fixed;
-      top: 0; left: 0; bottom: 0; right: 0;
-      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
-      z-index: 100;
-      background-size: 100% 4px, 6px 100%;
-      pointer-events: none;
-    }
-
-    /* Glitch Animation */
-    @keyframes glitch {
-      0% { text-shadow: 2px 0 #ff007f, -2px 0 #00f3ff; }
-      25% { text-shadow: -2px 0 #ff007f, 2px 0 #00f3ff; }
-      50% { text-shadow: 1px -1px #ff007f, -1px 1px #00f3ff; }
-      75% { text-shadow: -2px 1px #ff007f, 2px -1px #00f3ff; }
-      100% { text-shadow: 2px 0 #ff007f, -2px 0 #00f3ff; }
-    }
-    .glitch-text {
-      animation: glitch 2.5s infinite alternate;
-    }
-
-    /* Shake Animation for Locked Levels */
+    /* 搖晃動畫 */
     @keyframes shake {
       0%, 100% { transform: translateX(0); }
-      20% { transform: translateX(-6px) rotate(-1.5deg); }
-      40% { transform: translateX(6px) rotate(1.5deg); }
-      60% { transform: translateX(-4px); }
-      80% { transform: translateX(4px); }
+      20% { transform: translateX(-4px) rotate(-1deg); }
+      40% { transform: translateX(4px) rotate(1deg); }
+      60% { transform: translateX(-2px); }
+      80% { transform: translateX(2px); }
     }
     .animate-shake {
       animation: shake 0.35s ease-in-out;
     }
 
-    /* Holographic Border Gradient */
-    .holo-border {
-      border: 2px solid transparent;
-      border-image: linear-gradient(135deg, #00f3ff, #ff007f, #ffe600) 1;
-    }
-
-    /* Custom Scrollbar */
+    /* 自訂捲軸 */
     ::-webkit-scrollbar {
       width: 8px;
     }
     ::-webkit-scrollbar-track {
-      background: #080514;
+      background: #f7f5f0;
     }
     ::-webkit-scrollbar-thumb {
-      background: #ff007f;
+      background: #d4a373;
       border-radius: 4px;
     }
   </style>
 </head>
-<body class="bg-y2k-bg text-white font-tech h-full min-h-screen cyber-grid relative crt-overlay select-none flex flex-col justify-between overflow-x-hidden">
+<body class="bg-cozy-bg text-cozy-text font-sans h-full min-h-screen cozy-pattern select-none flex flex-col justify-between overflow-x-hidden">
 
   <!-- Header & Control Bar -->
-  <header class="w-full p-4 border-b-2 border-y2k-pink/50 bg-black/60 backdrop-blur-md sticky top-0 z-50 flex justify-between items-center px-6">
+  <header class="w-full p-4 border-b border-cozy-border bg-white/80 backdrop-blur-md sticky top-0 z-50 flex justify-between items-center px-6 shadow-sm">
     <div class="flex items-center space-x-3">
-      <span class="inline-block w-3 h-3 rounded-full bg-y2k-pink animate-ping"></span>
-      <h1 class="font-pixel text-xs md:text-sm text-y2k-cyan tracking-wider uppercase glitch-text">
-        SYSTEM v2.0.26 // PORTFOLIO
+      <span class="inline-block w-3 h-3 rounded-full bg-cozy-primary"></span>
+      <h1 class="font-bold text-sm md:text-base text-cozy-text tracking-wide">
+        ☕ 阮紅安的輕鬆日常作品集
       </h1>
     </div>
 
-    <!-- Controls: CRT & Sound Toggles -->
+    <!-- Controls: Sound Toggle -->
     <div class="flex items-center space-x-3 text-xs">
-      <button id="audio-toggle" class="px-3 py-1 bg-y2k-darkcard border border-y2k-cyan text-y2k-cyan hover:bg-y2k-cyan hover:text-black transition-all rounded font-pixel flex items-center gap-1">
-        🔊 <span id="audio-status">SFX: ON</span>
-      </button>
-      <button id="crt-toggle" class="px-3 py-1 bg-y2k-darkcard border border-y2k-pink text-y2k-pink hover:bg-y2k-pink hover:text-black transition-all rounded font-pixel flex items-center gap-1">
-        📺 <span id="crt-status">CRT: ON</span>
+      <button id="audio-toggle" class="px-3 py-1.5 bg-cozy-accent/50 border border-cozy-secondary/50 text-cozy-text hover:bg-cozy-secondary hover:text-white transition-all rounded-full font-medium flex items-center gap-1 shadow-sm">
+        🎵 <span id="audio-status">音效: 開啟</span>
       </button>
     </div>
   </header>
@@ -131,68 +97,62 @@
   <main class="container mx-auto px-4 py-8 max-w-5xl flex-grow flex flex-col items-center justify-center">
 
     <!-- Profile Section (Center) -->
-    <section class="w-full max-w-xl bg-y2k-darkcard/90 border-2 border-y2k-cyan p-6 rounded-2xl shadow-neon-cyan mb-10 text-center relative backdrop-blur-md transform transition-transform hover:scale-[1.01]">
+    <section class="w-full max-w-xl bg-cozy-card border border-cozy-border p-6 rounded-3xl shadow-cozy mb-10 text-center relative backdrop-blur-md transition-all duration-300 hover:shadow-cozy-hover">
       
-      <!-- Decorative Corner Accents -->
-      <div class="absolute -top-2 -left-2 w-4 h-4 border-t-2 border-l-2 border-y2k-yellow"></div>
-      <div class="absolute -top-2 -right-2 w-4 h-4 border-t-2 border-r-2 border-y2k-yellow"></div>
-      <div class="absolute -bottom-2 -left-2 w-4 h-4 border-b-2 border-l-2 border-y2k-yellow"></div>
-      <div class="absolute -bottom-2 -right-2 w-4 h-4 border-b-2 border-r-2 border-y2k-yellow"></div>
-
-      <!-- Avatar with Pulsing Hologram Glow -->
+      <!-- Avatar -->
       <div class="relative w-28 h-28 mx-auto mb-4 group">
-        <div class="absolute inset-0 rounded-full bg-gradient-to-r from-y2k-pink via-y2k-yellow to-y2k-cyan blur-md opacity-75 group-hover:opacity-100 animate-spin" style="animation-duration: 8s;"></div>
+        <div class="absolute inset-0 rounded-full bg-gradient-to-r from-cozy-secondary to-cozy-primary blur-sm opacity-30 group-hover:opacity-60 transition-opacity"></div>
         <img 
-          src="https://i.postimg.cc/QMdM3Hz7/quality-restoration-20261019161700277.jpg" 
+          src="https://i.postimg.cc/vZ4sLkcf/IMG-1190.jpg" 
           alt="Avatar" 
-          class="relative w-full h-full rounded-full border-2 border-y2k-cyan bg-black object-cover p-1"
-          onerror="this.src='https://placehold.co/120x120/120d26/00f3ff?text=AVATAR'"
+          class="relative w-full h-full rounded-full border-4 border-white bg-cozy-accent object-cover shadow-md"
+          onerror="this.src='https://placehold.co/120x120/d4a373/ffffff?text=AVATAR'"
         />
-        <span class="absolute bottom-1 right-1 bg-y2k-pink text-black text-[10px] font-pixel px-1.5 py-0.5 rounded-full border border-white">LVL.4</span>
+        <span class="absolute bottom-0 right-0 bg-cozy-primary text-white text-[11px] font-bold px-2 py-0.5 rounded-full shadow-sm border-2 border-white">Lv.4 成長中</span>
       </div>
 
       <!-- Player Name -->
-      <h2 class="text-2xl md:text-3xl font-pixel text-y2k-yellow tracking-widest mb-1 drop-shadow-[0_2px_4px_rgba(255,230,0,0.5)]">
+      <h2 class="text-2xl md:text-3xl font-bold text-cozy-text tracking-wider mb-1">
         阮紅安
       </h2>
-      <p class="text-xs text-y2k-cyan font-tech tracking-wider uppercase mb-4">
-        &lt; FRONTEND CYBER DEVELOPER / CREATOR &gt;
+      <p class="text-xs md:text-sm text-cozy-muted font-medium tracking-wide uppercase mb-5">
+        🌿 享受生活與寫扣的小日子創造者
       </p>
 
       <!-- Status Bar Panel -->
-      <div class="bg-black/80 border border-y2k-pink/60 p-4 rounded-xl text-left space-y-2">
-        <div class="flex justify-between items-center text-xs font-pixel">
-          <span class="text-y2k-pink flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-y2k-pink animate-pulse"></span>
-            STATUS: ONLINE
+      <div class="bg-cozy-bg border border-cozy-border p-4 rounded-2xl text-left space-y-2.5 shadow-inner">
+        <div class="flex justify-between items-center text-xs font-bold">
+          <span class="text-cozy-primary flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-cozy-primary animate-pulse"></span>
+            狀態：靈感滿點中 ✨
           </span>
-          <span class="text-y2k-yellow font-bold">COMPLETED: 4 / 16</span>
+          <span class="text-cozy-secondary">已完成：4 / 16 週</span>
         </div>
 
         <!-- Progress Bar (4/16 = 25%) -->
-        <div class="w-full h-4 bg-y2k-darkcard border border-y2k-cyan/50 rounded-full p-0.5 relative overflow-hidden">
-          <div class="h-full bg-gradient-to-r from-y2k-cyan via-y2k-pink to-y2k-yellow rounded-full transition-all duration-1000 shadow-[0_0_10px_#00f3ff]" style="width: 25%;"></div>
+        <div class="w-full h-3.5 bg-cozy-border/60 rounded-full p-0.5 relative overflow-hidden">
+          <div class="h-full bg-gradient-to-r from-cozy-secondary to-cozy-primary rounded-full transition-all duration-1000" style="width: 25%;"></div>
         </div>
 
-        <div class="flex justify-between text-[11px] text-gray-400 font-tech">
-          <span>PROGRESS: 25%</span>
-          <span>NEXT: WEEK 5 (LOCKED)</span>
+        <div class="flex justify-between text-[11px] text-cozy-muted font-medium">
+          <span>進度：25%</span>
+          <span>下一站：第 5 週 (準備解鎖)</span>
         </div>
       </div>
     </section>
 
     <!-- Notification Toast Box -->
-    <div id="toast" class="opacity-0 transition-opacity duration-300 fixed top-20 right-6 z-50 bg-red-900/90 border-2 border-red-500 text-red-200 px-4 py-2 rounded-lg shadow-lg font-pixel text-xs flex items-center gap-2 pointer-events-none">
-      <span>⚠️</span> <span id="toast-msg">ACCESS DENIED</span>
+    <div id="toast" class="opacity-0 transition-opacity duration-300 fixed top-20 right-6 z-50 bg-amber-100 border border-amber-300 text-amber-800 px-4 py-2.5 rounded-2xl shadow-lg font-medium text-xs flex items-center gap-2 pointer-events-none">
+      <span>💡</span> <span id="toast-msg">此階段還在努力手作中喔！</span>
     </div>
 
     <!-- Level Cards Grid (4x4 Matrix) -->
     <section class="w-full">
       <div class="flex items-center justify-between mb-4 px-2">
-        <h3 class="font-pixel text-sm text-y2k-cyan uppercase flex items-center gap-2">
-          <span>⚡</span> STAGE SELECT (16 WEEKS)
+        <h3 class="font-bold text-sm text-cozy-text uppercase flex items-center gap-2">
+          <span>🌱</span> 學習散步地圖 (16 週)
         </h3>
-        <span class="text-xs text-y2k-pink font-vt text-base">SELECT A LEVEL TO LAUNCH</span>
+        <span class="text-xs text-cozy-muted font-medium">點擊卡片查看作業成果</span>
       </div>
 
       <!-- Grid Container -->
@@ -204,13 +164,13 @@
   </main>
 
   <!-- Footer -->
-  <footer class="w-full border-t border-y2k-pink/30 bg-black/80 py-4 text-center text-xs text-gray-500 font-vt text-lg mt-8">
-    <p>Y2K PORTFOLIO SYSTEM © 2026 // ALL RIGHTS RESERVED</p>
+  <footer class="w-full border-t border-cozy-border bg-white/60 py-4 text-center text-xs text-cozy-muted mt-8">
+    <p>阮紅安的日常作品集 © 2026 // Keep it cozy & simple ☕</p>
   </footer>
 
   <!-- JavaScript Code -->
   <script>
-    // Audio Context Setup for 8-bit Sound Effects
+    // 溫馨輕柔音效設定
     let audioCtx = null;
     let sfxEnabled = true;
 
@@ -220,7 +180,7 @@
       }
     }
 
-    // Play synthesized hover beep sound
+    // 輕柔的滑過提示音 (柔和木琴感)
     function playHoverSound() {
       if (!sfxEnabled) return;
       try {
@@ -228,29 +188,47 @@
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(600, audioCtx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.05);
-        gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+        osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+        gain.gain.setValueAtTime(0.02, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.08);
         osc.connect(gain);
         gain.connect(audioCtx.destination);
         osc.start();
-        osc.stop(audioCtx.currentTime + 0.05);
+        osc.stop(audioCtx.currentTime + 0.08);
       } catch (e) {}
     }
 
-    // Play synthesized click success sound
+    // 輕快清脆的點擊音
     function playClickSound() {
       if (!sfxEnabled) return;
       try {
         initAudio();
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
-        osc.type = 'square';
-        osc.frequency.setValueAtTime(440, audioCtx.currentTime);
-        osc.frequency.setValueAtTime(880, audioCtx.currentTime + 0.08);
-        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(659.25, audioCtx.currentTime); // E5
+        osc.frequency.exponentialRampToValueAtTime(783.99, audioCtx.currentTime + 0.1); // G5
+        gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.15);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.15);
+      } catch (e) {}
+    }
+
+    // 溫和的鎖定提示音
+    function playLockedSound() {
+      if (!sfxEnabled) return;
+      try {
+        initAudio();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+        osc.frequency.setValueAtTime(185, audioCtx.currentTime + 0.08);
+        gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.2);
         osc.connect(gain);
         gain.connect(audioCtx.destination);
         osc.start();
@@ -258,26 +236,7 @@
       } catch (e) {}
     }
 
-    // Play synthesized locked error sound
-    function playLockedSound() {
-      if (!sfxEnabled) return;
-      try {
-        initAudio();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(150, audioCtx.currentTime);
-        osc.frequency.setValueAtTime(110, audioCtx.currentTime + 0.1);
-        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.25);
-      } catch (e) {}
-    }
-
-    // Data for 16 Stages
+    // 16 週課程資料
     const levelsData = [
       { week: 1, title: "Week 1 - 數位名片", url: "w1/index.html", unlocked: true },
       { week: 2, title: "Week 2 - 今天吃甚麼?", url: "w2/index.html", unlocked: true },
@@ -297,7 +256,7 @@
       { week: 16, title: "Week 16 - 期末專案", url: "w16/index.html", unlocked: false },
     ];
 
-    // Show Notification Toast
+    // 顯示提示訊息
     function showToast(msg) {
       const toast = document.getElementById('toast');
       const toastMsg = document.getElementById('toast-msg');
@@ -310,7 +269,7 @@
       }, 2000);
     }
 
-    // Render Stage Cards
+    // 渲染卡片網格
     function renderGrid() {
       const grid = document.getElementById('grid-container');
       grid.innerHTML = '';
@@ -319,33 +278,33 @@
         const card = document.createElement('div');
         
         if (level.unlocked) {
-          // Unlocked Card Styling
+          // 已解鎖卡片樣式
           card.className = `
-            relative bg-y2k-darkcard/80 border-2 border-y2k-cyan p-4 rounded-xl 
-            shadow-[0_0_10px_rgba(0,243,255,0.2)] hover:shadow-neon-cyan hover:border-y2k-yellow 
-            transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 
-            cursor-pointer flex flex-col justify-between h-36 group backdrop-blur-sm
+            relative bg-cozy-card border border-cozy-border p-4 rounded-2xl 
+            shadow-sm hover:shadow-cozy-hover hover:border-cozy-primary 
+            transition-all duration-300 transform hover:-translate-y-1 
+            cursor-pointer flex flex-col justify-between h-36 group
           `;
 
           card.innerHTML = `
             <div class="flex justify-between items-start">
-              <span class="font-pixel text-xs text-y2k-yellow bg-black/60 px-2 py-1 rounded border border-y2k-yellow/40">
+              <span class="text-xs font-bold text-cozy-primary bg-cozy-tag px-2.5 py-1 rounded-full">
                 W${level.week}
               </span>
-              <span class="text-xs bg-y2k-cyan text-black font-pixel px-1.5 py-0.5 rounded font-bold">
-                OPEN
+              <span class="text-[11px] bg-cozy-primary/10 text-cozy-primary font-bold px-2 py-0.5 rounded-full">
+                已解鎖 ✨
               </span>
             </div>
             
             <div class="my-2">
-              <h4 class="font-tech text-base text-white font-bold group-hover:text-y2k-cyan transition-colors line-clamp-2">
+              <h4 class="font-bold text-sm md:text-base text-cozy-text group-hover:text-cozy-primary transition-colors line-clamp-2">
                 ${level.title}
               </h4>
             </div>
 
-            <div class="flex justify-between items-center text-[10px] text-y2k-cyan/80 font-pixel">
-              <span>[CLEAR]</span>
-              <span class="group-hover:translate-x-1 transition-transform">LAUNCH ▶</span>
+            <div class="flex justify-between items-center text-xs text-cozy-secondary font-medium">
+              <span>輕鬆散步中</span>
+              <span class="group-hover:translate-x-1 transition-transform">前往觀看 ➔</span>
             </div>
           `;
 
@@ -358,47 +317,46 @@
           });
 
         } else {
-          // Locked Card Styling
+          // 未解鎖卡片樣式
           card.className = `
-            relative bg-gray-900/40 border border-gray-700/60 p-4 rounded-xl 
+            relative bg-cozy-bg/60 border border-cozy-border/60 p-4 rounded-2xl 
             opacity-60 hover:opacity-90 transition-all duration-200 
-            cursor-not-allowed flex flex-col justify-between h-36 backdrop-blur-sm group select-none
+            cursor-not-allowed flex flex-col justify-between h-36 group select-none
           `;
 
           card.innerHTML = `
             <div class="flex justify-between items-start">
-              <span class="font-pixel text-xs text-gray-500 bg-black/50 px-2 py-1 rounded">
+              <span class="text-xs font-medium text-cozy-muted bg-cozy-border/50 px-2.5 py-1 rounded-full">
                 W${level.week}
               </span>
-              <span class="text-sm">🔒</span>
+              <span class="text-xs">🔒</span>
             </div>
 
             <div class="my-2">
-              <h4 class="font-tech text-sm text-gray-400 font-medium">
+              <h4 class="font-medium text-sm text-cozy-muted">
                 ${level.title}
               </h4>
             </div>
 
-            <div class="flex justify-between items-center text-[10px] text-gray-500 font-pixel">
-              <span>STATUS: LOCKED</span>
-              <span class="text-red-400">DENIED</span>
+            <div class="flex justify-between items-center text-xs text-cozy-muted">
+              <span>尚未解鎖</span>
+              <span>敬請期待</span>
             </div>
           `;
 
-          // Hover Warning & Shake
+          // 懸停與點擊提示
           card.addEventListener('mouseenter', () => {
             playLockedSound();
-            card.classList.add('animate-shake', 'border-red-500/80');
-            setTimeout(() => card.classList.remove('animate-shake', 'border-red-500/80'), 350);
+            card.classList.add('animate-shake');
+            setTimeout(() => card.classList.remove('animate-shake'), 350);
           });
 
-          // Click Warning
           card.addEventListener('click', (e) => {
             e.preventDefault();
             playLockedSound();
-            card.classList.add('animate-shake', 'border-red-500');
-            showToast(`SYSTEM LOCKED: W${level.week} ACCESS DENIED`);
-            setTimeout(() => card.classList.remove('animate-shake', 'border-red-500'), 350);
+            card.classList.add('animate-shake');
+            showToast(`第 ${level.week} 週還在努力手作中，敬請期待喔！🍵`);
+            setTimeout(() => card.classList.remove('animate-shake'), 350);
           });
         }
 
@@ -406,24 +364,15 @@
       });
     }
 
-    // Toggle CRT Scanlines
-    document.getElementById('crt-toggle').addEventListener('click', () => {
-      document.body.classList.toggle('crt-overlay');
-      const crtStatus = document.getElementById('crt-status');
-      const isCrt = document.body.classList.contains('crt-overlay');
-      crtStatus.innerText = isCrt ? 'CRT: ON' : 'CRT: OFF';
-      playClickSound();
-    });
-
-    // Toggle Audio Effects
+    // 音效開關切換
     document.getElementById('audio-toggle').addEventListener('click', () => {
       sfxEnabled = !sfxEnabled;
       const audioStatus = document.getElementById('audio-status');
-      audioStatus.innerText = sfxEnabled ? 'SFX: ON' : 'SFX: OFF';
+      audioStatus.innerText = sfxEnabled ? '音效: 開啟' : '音效: 關閉';
       if (sfxEnabled) playClickSound();
     });
 
-    // Initialize Page
+    // 初始化頁面
     window.addEventListener('DOMContentLoaded', () => {
       renderGrid();
     });
