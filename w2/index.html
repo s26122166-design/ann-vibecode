@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>今天吃什麼？隨機抽籤機</title>
     <style>
+        /* 基礎重置與活潑可愛黃橘配色 */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -44,6 +45,7 @@
             line-height: 1.4;
         }
 
+        /* 彈跳動畫 */
         .bounce {
             animation: bounce 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
@@ -80,10 +82,14 @@
 
         .result-container {
             margin-top: 24px;
-            display: flex;
+            display: none;
             flex-direction: column;
             align-items: center;
             gap: 16px;
+        }
+
+        .result-container.show {
+            display: flex !important;
         }
 
         .image-wrapper {
@@ -134,11 +140,14 @@
 <body>
     <div class="container">
         <div class="card">
+            <!-- 大標題 -->
             <h1 id="main-title" class="title">今天吃什麼？</h1>
             
-            <button id="draw-btn" class="btn-draw" onclick="drawFood()">點我抽籤 🎲</button>
+            <!-- 抽籤按鈕 -->
+            <button id="draw-btn" class="btn-draw">點我抽籤 🎲</button>
 
-            <div id="result-container" class="result-container" style="display: none;">
+            <!-- 結果展示區 -->
+            <div id="result-container" class="result-container">
                 <div class="image-wrapper">
                     <img id="food-img" src="" alt="美食照片">
                 </div>
@@ -149,3 +158,57 @@
     </div>
 
     <script>
+        (function() {
+            // 餐廳清單
+            const foods = [
+                { name: '深水食堂', image: 'https://images.unsplash.com/photo-1555126634-323283e090fa?q=80&w=800&auto=format&fit=crop', query: '深水食堂' },
+                { name: '石二鍋', image: 'https://images.unsplash.com/photo-1547592180-85f173990554?q=80&w=800&auto=format&fit=crop', query: '石二鍋' },
+                { name: '娜娜法國麵包', image: 'https://images.unsplash.com/photo-1608897013039-887f21d8c804?q=80&w=800&auto=format&fit=crop', query: '娜娜法國麵包' },
+                { name: '豆莊', image: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?q=80&w=800&auto=format&fit=crop', query: '豆莊' },
+                { name: '炒飯', image: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?q=80&w=800&auto=format&fit=crop', query: '炒飯' }
+            ];
+
+            // 啟動邏輯
+            function bindEvents() {
+                const drawBtn = document.getElementById('draw-btn');
+                const mainTitle = document.getElementById('main-title');
+                const resultContainer = document.getElementById('result-container');
+                const foodImg = document.getElementById('food-img');
+                const foodName = document.getElementById('food-name');
+                const mapBtn = document.getElementById('map-btn');
+
+                if (!drawBtn) return;
+
+                // 綁定點擊事件
+                drawBtn.onclick = function() {
+                    const selectedFood = foods[Math.floor(Math.random() * foods.length)];
+
+                    // 重置動畫
+                    mainTitle.classList.remove('bounce');
+                    resultContainer.classList.remove('bounce');
+                    void mainTitle.offsetWidth; // 強制重繪
+
+                    // 替換內容
+                    mainTitle.textContent = `✨ 今天就吃：${selectedFood.name}！`;
+                    mainTitle.classList.add('bounce');
+
+                    foodImg.src = selectedFood.image;
+                    foodImg.alt = selectedFood.name;
+                    foodName.textContent = selectedFood.name;
+                    mapBtn.href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(selectedFood.query);
+
+                    // 顯示結果
+                    resultContainer.classList.add('show', 'bounce');
+                };
+            }
+
+            // 防呆載入：無論網頁是在載入中或已完成，都一定能正確綁定
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', bindEvents);
+            } else {
+                bindEvents();
+            }
+        })();
+    </script>
+</body>
+</html>
