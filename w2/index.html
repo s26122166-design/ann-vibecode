@@ -102,6 +102,7 @@
             overflow: hidden;
             border: 3px solid #FFE082;
             box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            background-color: #FFF3E0;
         }
 
         .image-wrapper img {
@@ -160,33 +161,32 @@
     </div>
 
     <script>
-        // 確保 HTML 載入完全後才執行
-        document.addEventListener('DOMContentLoaded', () => {
+        function initApp() {
             // 餐廳資料清單
             const foods = [
                 {
                     name: '深水食堂',
-                    image: 'https://images.unsplash.com/photo-1555126634-323283e090fa?q=80&w=800&auto=format&fit=crop',
+                    image: '[https://images.unsplash.com/photo-1555126634-323283e090fa?q=80&w=800&auto=format&fit=crop](https://images.unsplash.com/photo-1555126634-323283e090fa?q=80&w=800&auto=format&fit=crop)',
                     query: '深水食堂'
                 },
                 {
                     name: '石二鍋',
-                    image: 'https://images.unsplash.com/photo-1547592180-85f173990554?q=80&w=800&auto=format&fit=crop',
+                    image: '[https://images.unsplash.com/photo-1547592180-85f173990554?q=80&w=800&auto=format&fit=crop](https://images.unsplash.com/photo-1547592180-85f173990554?q=80&w=800&auto=format&fit=crop)',
                     query: '石二鍋'
                 },
                 {
                     name: '娜娜法國麵包',
-                    image: 'https://images.unsplash.com/photo-1608897013039-887f21d8c804?q=80&w=800&auto=format&fit=crop',
+                    image: '[https://images.unsplash.com/photo-1608897013039-887f21d8c804?q=80&w=800&auto=format&fit=crop](https://images.unsplash.com/photo-1608897013039-887f21d8c804?q=80&w=800&auto=format&fit=crop)',
                     query: '娜娜法國麵包'
                 },
                 {
                     name: '豆莊',
-                    image: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?q=80&w=800&auto=format&fit=crop',
+                    image: '[https://images.unsplash.com/photo-1525351484163-7529414344d8?q=80&w=800&auto=format&fit=crop](https://images.unsplash.com/photo-1525351484163-7529414344d8?q=80&w=800&auto=format&fit=crop)',
                     query: '豆莊'
                 },
                 {
                     name: '炒飯',
-                    image: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?q=80&w=800&auto=format&fit=crop',
+                    image: '[https://images.unsplash.com/photo-1603133872878-684f208fb84b?q=80&w=800&auto=format&fit=crop](https://images.unsplash.com/photo-1603133872878-684f208fb84b?q=80&w=800&auto=format&fit=crop)',
                     query: '炒飯'
                 }
             ];
@@ -198,6 +198,8 @@
             const foodImg = document.getElementById('food-img');
             const foodName = document.getElementById('food-name');
             const mapBtn = document.getElementById('map-btn');
+
+            if (!drawBtn) return;
 
             // 點擊抽籤邏輯
             drawBtn.addEventListener('click', () => {
@@ -220,10 +222,20 @@
                 foodImg.src = selectedFood.image;
                 foodImg.alt = selectedFood.name;
                 foodName.textContent = selectedFood.name;
-                mapBtn.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(selectedFood.query)}`;
+                mapBtn.href = `[https://www.google.com/maps/search/?api=1&query=$](https://www.google.com/maps/search/?api=1&query=$){encodeURIComponent(selectedFood.query)}`;
 
                 // 5. 顯示結果區塊並加上彈跳動畫
                 resultContainer.classList.remove('hidden');
                 resultContainer.classList.add('bounce');
             });
-        });
+        }
+
+        // 雙重保障：無論網頁是載入中還是已經準備好，都確保綁定點擊事件
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
+    </script>
+</body>
+</html>
