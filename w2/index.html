@@ -1,214 +1,520 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>今天吃什麼？隨機抽籤機</title>
-    <style>
-        /* 基礎重置與活潑可愛黃橘配色 */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: "PingFang TC", "Microsoft JhengHei", sans-serif;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>今天吃什麼？隨機抽籤機 🍱</title>
 
-        body {
-            background-color: #FFF8E7;
-            background-image: radial-gradient(#FFE082 10%, transparent 10%);
-            background-size: 20px 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Canvas Confetti Library -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Google Fonts: Mochiy Pop One & Noto Sans TC -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
 
-        .container {
-            width: 100%;
-            max-width: 420px;
-        }
+  <style>
+    /* 全域可愛配色與背景圖案 */
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      background-color: #FFFDF5;
+      background-image: 
+        radial-gradient(#FFE8A3 2px, transparent 2px),
+        radial-gradient(#FFD166 1.5px, #FFFDF5 1.5px);
+      background-size: 32px 32px;
+      background-position: 0 0, 16px 16px;
+    }
 
-        .card {
-            background: #FFFFFF;
-            border: 4px solid #FFA000;
-            border-radius: 28px;
-            padding: 32px 24px;
-            text-align: center;
-            box-shadow: 0 10px 0px #FF8F00;
-        }
+    .font-cute {
+      font-family: 'Mochiy Pop One', 'Noto Sans TC', cursive, sans-serif;
+    }
 
-        .title {
-            font-size: 1.8rem;
-            color: #E65100;
-            margin-bottom: 24px;
-            line-height: 1.4;
-        }
+    /* 自訂 Q 彈 (Bounce) 動畫 */
+    @keyframes superBounce {
+      0% { transform: scale(0.3) rotate(-5deg); opacity: 0; }
+      50% { transform: scale(1.15) rotate(3deg); opacity: 1; }
+      75% { transform: scale(0.92) rotate(-2deg); }
+      100% { transform: scale(1) rotate(0deg); }
+    }
 
-        /* 彈跳動畫 */
-        .bounce {
-            animation: bounce 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
+    .animate-super-bounce {
+      animation: superBounce 0.65s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
 
-        @keyframes bounce {
-            0% { transform: scale(0.3); opacity: 0; }
-            60% { transform: scale(1.08); opacity: 1; }
-            80% { transform: scale(0.95); }
-            100% { transform: scale(1); }
-        }
+    /* 微搖擺效果 */
+    @keyframes gentleWiggle {
+      0%, 100% { transform: rotate(-3deg); }
+      50% { transform: rotate(3deg); }
+    }
 
-        .btn-draw {
-            background-color: #FFB300;
-            color: #FFFFFF;
-            font-size: 1.25rem;
-            font-weight: bold;
-            padding: 14px 36px;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 6px 0px #FF8F00;
-            transition: all 0.1s ease;
-            outline: none;
-        }
+    .animate-wiggle {
+      animation: gentleWiggle 2.2s infinite ease-in-out;
+    }
 
-        .btn-draw:hover {
-            background-color: #FFC107;
-        }
+    /* 立體按鈕樣式與按壓感 */
+    .btn-3d-orange {
+      background: linear-gradient(135deg, #FF9F1C 0%, #FF6B00 100%);
+      box-shadow: 0 8px 0 #C65100, 0 15px 20px rgba(255, 107, 0, 0.35);
+      transition: all 0.12s ease;
+    }
+    .btn-3d-orange:hover {
+      background: linear-gradient(135deg, #FFAE34 0%, #FF7B1A 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 0 #C65100, 0 18px 24px rgba(255, 107, 0, 0.4);
+    }
+    .btn-3d-orange:active {
+      transform: translateY(6px);
+      box-shadow: 0 2px 0 #C65100, 0 4px 10px rgba(255, 107, 0, 0.3);
+    }
 
-        .btn-draw:active {
-            transform: translateY(4px);
-            box-shadow: 0 2px 0px #FF8F00;
-        }
+    .btn-3d-green {
+      background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+      box-shadow: 0 6px 0 #047857, 0 12px 18px rgba(16, 185, 129, 0.3);
+      transition: all 0.12s ease;
+    }
+    .btn-3d-green:hover {
+      background: linear-gradient(135deg, #34D399 0%, #10B981 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 0 #047857, 0 14px 20px rgba(16, 185, 129, 0.35);
+    }
+    .btn-3d-green:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 #047857, 0 4px 8px rgba(16, 185, 129, 0.25);
+    }
 
-        .result-container {
-            margin-top: 24px;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .result-container.show {
-            display: flex !important;
-        }
-
-        .image-wrapper {
-            width: 100%;
-            height: 220px;
-            border-radius: 20px;
-            overflow: hidden;
-            border: 3px solid #FFE082;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            background-color: #FFF3E0;
-        }
-
-        .image-wrapper img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .food-name {
-            font-size: 1.4rem;
-            font-weight: bold;
-            color: #FF6F00;
-        }
-
-        .btn-map {
-            display: inline-block;
-            background-color: #FF5722;
-            color: white;
-            text-decoration: none;
-            font-size: 1.1rem;
-            font-weight: bold;
-            padding: 12px 30px;
-            border-radius: 50px;
-            box-shadow: 0 5px 0px #E64A19;
-            transition: all 0.1s ease;
-        }
-
-        .btn-map:hover {
-            background-color: #F4511E;
-        }
-
-        .btn-map:active {
-            transform: translateY(3px);
-            box-shadow: 0 2px 0px #E64A19;
-        }
-    </style>
+    /* 隱藏滾動條 */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
 </head>
-<body>
-    <div class="container">
-        <div class="card">
-            <!-- 大標題 -->
-            <h1 id="main-title" class="title">今天吃什麼？</h1>
-            
-            <!-- 抽籤按鈕 -->
-            <button id="draw-btn" class="btn-draw">點我抽籤 🎲</button>
+<body class="min-h-screen flex flex-col justify-between items-center p-4 sm:p-6 text-slate-800">
 
-            <!-- 結果展示區 -->
-            <div id="result-container" class="result-container">
-                <div class="image-wrapper">
-                    <img id="food-img" src="" alt="美食照片">
-                </div>
-                <p id="food-name" class="food-name"></p>
-                <a id="map-btn" class="btn-map" href="#" target="_blank" rel="noopener noreferrer">馬上出發 🧭</a>
-            </div>
+  <!-- 頁面頂部卡片 container -->
+  <div class="w-full max-w-md mx-auto my-auto">
+    
+    <!-- Header 區塊與可替換標題 -->
+    <header class="text-center mb-6 pt-2">
+      <div class="inline-flex items-center gap-2 bg-amber-100/90 border border-amber-300 text-amber-900 px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold shadow-sm mb-3">
+        <span class="text-base">✨</span>
+        <span>解決每日選擇困難症的神器</span>
+      </div>
+
+      <!-- 動態替換標題區域 -->
+      <div id="title-wrapper" class="relative py-2">
+        <h1 id="main-title" class="font-cute text-3xl sm:text-4xl text-amber-600 tracking-wider flex items-center justify-center gap-2 drop-shadow-sm">
+          <span class="inline-block animate-wiggle">🍱</span>
+          <span id="title-text">今天吃什麼？</span>
+          <span class="inline-block animate-wiggle" style="animation-delay: 0.6s;">🍜</span>
+        </h1>
+        <p id="sub-title" class="text-amber-700/80 text-xs sm:text-sm font-medium mt-2">
+          點擊下方大按鈕，交給命運選出今天的美味！
+        </p>
+      </div>
+    </header>
+
+    <!-- 主要互動主卡片 -->
+    <main class="bg-white/95 backdrop-blur-md border-4 border-amber-300 rounded-3xl p-6 shadow-2xl relative overflow-hidden">
+      
+      <!-- 卡片可愛背景光芒 -->
+      <div class="absolute -top-12 -right-12 w-32 h-32 bg-yellow-200 rounded-full blur-2xl opacity-60 pointer-events-none"></div>
+      <div class="absolute -bottom-12 -left-12 w-32 h-32 bg-orange-200 rounded-full blur-2xl opacity-60 pointer-events-none"></div>
+
+      <!-- 階段一：等待抽籤 / 跑馬燈滾動區 -->
+      <div id="slot-display-section" class="flex flex-col items-center">
+        
+        <!-- 跑馬燈滾動動態顯示框 -->
+        <div class="w-full bg-gradient-to-br from-amber-50 via-yellow-100 to-orange-50 border-2 border-amber-300 rounded-2xl p-6 sm:p-8 mb-6 text-center shadow-inner relative flex flex-col items-center justify-center min-h-[140px]">
+          <span class="absolute top-2.5 left-3 text.amber-500/80 text-[10px] font-black tracking-widest uppercase">
+            FOOD SLOT MACHINE
+          </span>
+          
+          <div id="candidate-display" class="font-cute text-2xl sm:text-3xl font-bold text-amber-800 transition-all">
+            🎲 等你來抽！
+          </div>
+          <div id="spinning-hint" class="text-xs text-amber-600/70 font-bold mt-2 hidden">
+            正在極速挑選中... 😋
+          </div>
         </div>
+
+        <!-- 主大按鈕：「點我抽籤 🎲」 -->
+        <button id="draw-btn" class="btn-3d-orange w-full text-white font-cute text-2xl sm:text-3xl py-4 sm:py-5 px-6 rounded-2xl flex items-center justify-center gap-3 font-bold cursor-pointer border-2 border-orange-400">
+          <i class="fa-solid fa-dice text-3xl"></i>
+          <span>點我抽籤 🎲</span>
+        </button>
+      </div>
+
+      <!-- 階段二：抽籤結果展示卡片 -->
+      <div id="result-card-section" class="hidden flex-col items-center text-center">
+        
+        <span class="bg-gradient-to-r from-orange-500 to-amber-500 text-white font-bold text-xs px-3.5 py-1 rounded-full mb-3 shadow-sm inline-flex items-center gap-1.5">
+          <i class="fa-solid fa-award"></i> 今天為你推薦
+        </span>
+
+        <!-- 店名標題 (備用卡片用) -->
+        <h2 id="result-food-name" class="font-cute text-3xl font-black text-amber-600 mb-3 tracking-wide drop-shadow-sm">
+          --
+        </h2>
+
+        <!-- 美食高畫質相片卡 -->
+        <div class="relative w-full h-48 sm:h-52 rounded-2xl overflow-hidden mb-4 shadow-md border-2 border-amber-200 bg-amber-50 group">
+          <img id="result-food-img" src="" alt="美食照片" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" onerror="this.src='https://placehold.co/600x400/FFB703/FFFFFF?text=Delicious+Food'">
+          
+          <!-- 圖片上浮動籤籤分類標籤 -->
+          <div class="absolute bottom-2 left-2 bg-black/60 backdrop-blur-md text-white text-xs font-semibold px-2.5 py-1 rounded-lg">
+            <span id="result-food-tag">🍜 推薦美食</span>
+          </div>
+        </div>
+
+        <!-- 簡短特色敘述 -->
+        <p id="result-food-desc" class="text-slate-600 text-sm font-medium mb-6 px-1 leading-relaxed">
+          --
+        </p>
+
+        <!-- 操作按鈕群：馬上出發 & 再抽一次 -->
+        <div class="w-full flex flex-col gap-3">
+          <!-- 「馬上出發 🧭」 Google Maps 連結按鈕 -->
+          <a id="map-btn" href="#" target="_blank" rel="noopener noreferrer" class="btn-3d-green w-full text-white font-bold text-lg py-3.5 px-6 rounded-xl shadow-md flex items-center justify-center gap-2.5 text-decoration-none">
+            <i class="fa-solid fa-compass text-xl"></i>
+            <span>馬上出發 🧭</span>
+          </a>
+
+          <!-- 「再抽一次」按鈕 -->
+          <button id="retry-btn" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm py-2.5 px-5 rounded-xl border border-slate-300 transition-colors flex items-center justify-center gap-2 active:scale-95">
+            <i class="fa-solid fa-rotate-right"></i>
+            <span>不滿意？再試一次 🔄</span>
+          </button>
+        </div>
+
+      </div>
+
+    </main>
+
+    <!-- 籤筒管理展開面板 -->
+    <div class="mt-4 text-center">
+      <button id="toggle-list-btn" class="text-xs font-bold text-amber-800 bg-amber-200/60 hover:bg-amber-200 px-3.5 py-1.5 rounded-full transition-all inline-flex items-center gap-1.5 shadow-sm">
+        <i class="fa-solid fa-list-check"></i>
+        <span>查看 / 管理籤筒菜單 (5 家)</span>
+        <i id="toggle-icon" class="fa-solid fa-chevron-down text-[10px]"></i>
+      </button>
     </div>
 
-    <script>
-        (function() {
-            // 餐廳清單
-            const foods = [
-                { name: '深水食堂', image: 'https://images.unsplash.com/photo-1555126634-323283e090fa?q=80&w=800&auto=format&fit=crop', query: '深水食堂' },
-                { name: '石二鍋', image: 'https://images.unsplash.com/photo-1547592180-85f173990554?q=80&w=800&auto=format&fit=crop', query: '石二鍋' },
-                { name: '娜娜法國麵包', image: 'https://images.unsplash.com/photo-1608897013039-887f21d8c804?q=80&w=800&auto=format&fit=crop', query: '娜娜法國麵包' },
-                { name: '豆莊', image: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?q=80&w=800&auto=format&fit=crop', query: '豆莊' },
-                { name: '炒飯', image: 'https://images.unsplash.com/photo-1603133872878-684f208fb84b?q=80&w=800&auto=format&fit=crop', query: '炒飯' }
-            ];
+    <!-- 展開選單區 -->
+    <div id="list-modal" class="hidden mt-3 bg-white/90 backdrop-blur-md rounded-2xl p-4 border border-amber-300 shadow-lg text-xs">
+      <div class="flex items-center justify-between font-bold text-amber-900 pb-2 mb-2 border-b border-amber-100">
+        <span>📋 當前口袋名單：</span>
+        <span id="food-count-badge" class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded-md">5 家店</span>
+      </div>
 
-            // 啟動邏輯
-            function bindEvents() {
-                const drawBtn = document.getElementById('draw-btn');
-                const mainTitle = document.getElementById('main-title');
-                const resultContainer = document.getElementById('result-container');
-                const foodImg = document.getElementById('food-img');
-                const foodName = document.getElementById('food-name');
-                const mapBtn = document.getElementById('map-btn');
+      <!-- 預設店家清單 -->
+      <ul id="food-list-container" class="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto no-scrollbar pr-1">
+        <!-- 由 JavaScript 動態填入 -->
+      </ul>
 
-                if (!drawBtn) return;
+      <!-- 自訂新增店家輸入框 -->
+      <div class="mt-3 pt-2 border-t border-amber-100 flex gap-2">
+        <input id="new-food-input" type="text" placeholder="新增自訂店家..." class="w-full px-3 py-1.5 border border-amber-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-amber-500">
+        <button id="add-food-btn" class="bg-amber-500 hover:bg-amber-600 text-white font-bold px-3 py-1.5 rounded-lg shrink-0 transition-colors">
+          <i class="fa-solid fa-plus"></i> 新增
+        </button>
+      </div>
+    </div>
 
-                // 綁定點擊事件
-                drawBtn.onclick = function() {
-                    const selectedFood = foods[Math.floor(Math.random() * foods.length)];
+  </div>
 
-                    // 重置動畫
-                    mainTitle.classList.remove('bounce');
-                    resultContainer.classList.remove('bounce');
-                    void mainTitle.offsetWidth; // 強制重繪
+  <!-- 頁尾 -->
+  <footer class="mt-6 text-center text-xs text-amber-700/60 font-medium">
+    <p>❤️ 祝你今天用餐愉快，享用美味佳餚！</p>
+  </footer>
 
-                    // 替換內容
-                    mainTitle.textContent = `✨ 今天就吃：${selectedFood.name}！`;
-                    mainTitle.classList.add('bounce');
+  <!-- 核心 JavaScript 程式邏輯 (完整包含在 DOMContentLoaded) -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      
+      // 預設指定抽籤資料庫
+      const defaultFoods = [
+        {
+          name: "深水食堂",
+          tag: "🍱 日式定食・丼飯",
+          image: "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?q=80&w=800&auto=format&fit=crop",
+          query: "深水食堂",
+          desc: "熱騰騰的日式定食與香甜大碗丼飯，帶來極致豐富的滿足感！"
+        },
+        {
+          name: "石二鍋",
+          tag: "🍲 暖胃石頭火鍋",
+          image: "https://images.unsplash.com/photo-1555126634-323283e090fa?q=80&w=800&auto=format&fit=crop",
+          query: "石二鍋",
+          desc: "澎湃新鮮蔬菜盤搭配香濃鮮甜石頭湯頭，火鍋控的最愛！"
+        },
+        {
+          name: "娜娜法國麵包",
+          tag: "🥖 越式法包・輕食",
+          image: "https://images.unsplash.com/photo-1626844131082-256783844137?q=80&w=800&auto=format&fit=crop",
+          query: "娜娜法國麵包",
+          desc: "外皮酥脆香噴噴、內餡紮實飽滿，搭配爽口酸甜醃蘿蔔超美味！"
+        },
+        {
+          name: "豆莊",
+          tag: "🍳 傳統早餐・現煎蛋餅",
+          image: "https://images.unsplash.com/photo-1525351484163-7529414344d8?q=80&w=800&auto=format&fit=crop",
+          query: "豆莊",
+          desc: "香濃現磨豆漿搭配外酥內軟古早味蛋餅，開啟活力的一天！"
+        },
+        {
+          name: "炒飯",
+          tag: "🍚 鑊氣十足炒飯",
+          image: "https://images.unsplash.com/photo-1603133872878-684f208fb84b?q=80&w=800&auto=format&fit=crop",
+          query: "炒飯",
+          desc: "粒粒分明、香氣四溢的爆炒極品，經典簡單卻令人停不下來！"
+        }
+      ];
 
-                    foodImg.src = selectedFood.image;
-                    foodImg.alt = selectedFood.name;
-                    foodName.textContent = selectedFood.name;
-                    mapBtn.href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(selectedFood.query);
+      // 目前運作的店家清單
+      let currentFoodList = [...defaultFoods];
+      let isSpinning = false;
 
-                    // 顯示結果
-                    resultContainer.classList.add('show', 'bounce');
-                };
+      // DOM 元素抓取
+      const drawBtn = document.getElementById('draw-btn');
+      const retryBtn = document.getElementById('retry-btn');
+      const slotDisplaySection = document.getElementById('slot-display-section');
+      const resultCardSection = document.getElementById('result-card-section');
+      
+      const mainTitle = document.getElementById('main-title');
+      const titleText = document.getElementById('title-text');
+      const subTitle = document.getElementById('sub-title');
+      
+      const candidateDisplay = document.getElementById('candidate-display');
+      const spinningHint = document.getElementById('spinning-hint');
+      
+      const resultFoodName = document.getElementById('result-food-name');
+      const resultFoodImg = document.getElementById('result-food-img');
+      const resultFoodTag = document.getElementById('result-food-tag');
+      const resultFoodDesc = document.getElementById('result-food-desc');
+      const mapBtn = document.getElementById('map-btn');
+
+      const toggleListBtn = document.getElementById('toggle-list-btn');
+      const toggleIcon = document.getElementById('toggle-icon');
+      const listModal = document.getElementById('list-modal');
+      const foodListContainer = document.getElementById('food-list-container');
+      const foodCountBadge = document.getElementById('food-count-badge');
+      const newFoodInput = document.getElementById('new-food-input');
+      const addFoodBtn = document.getElementById('add-food-btn');
+
+      // Web Audio 滴答聲效果
+      function playAudioTick() {
+        try {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (!AudioContext) return;
+          const ctx = new AudioContext();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(450 + Math.random() * 150, ctx.currentTime);
+          gain.gain.setValueAtTime(0.05, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.04);
+          
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start();
+          osc.stop(ctx.currentTime + 0.04);
+        } catch (e) {
+          // 忽略音效不相容的瀏覽器
+        }
+      }
+
+      // Web Audio 中獎歡呼音效
+      function playVictorySound() {
+        try {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (!AudioContext) return;
+          const ctx = new AudioContext();
+          const freqs = [330, 392, 493.88, 659.25];
+          freqs.forEach((freq, index) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.frequency.setValueAtTime(freq, ctx.currentTime + index * 0.09);
+            gain.gain.setValueAtTime(0.12, ctx.currentTime + index * 0.09);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + index * 0.09 + 0.3);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(ctx.currentTime + index * 0.09);
+            osc.stop(ctx.currentTime + index * 0.09 + 0.3);
+          });
+        } catch (e) {}
+      }
+
+      // 渲染籤筒店家清單列表
+      function renderFoodList() {
+        foodListContainer.innerHTML = '';
+        foodCountBadge.textContent = `${currentFoodList.length} 家店`;
+        toggleListBtn.querySelector('span').textContent = `查看 / 管理籤筒菜單 (${currentFoodList.length} 家)`;
+
+        currentFoodList.forEach((food, index) => {
+          const li = document.createElement('li');
+          li.className = 'flex items-center justify-between bg-amber-50 p-2 rounded-xl border border-amber-200/70 text-amber-900 font-medium';
+          li.innerHTML = `
+            <div class="flex items-center gap-2 truncate">
+              <i class="fa-solid fa-utensils text-amber-500 text-xs"></i>
+              <span class="truncate font-bold">${food.name}</span>
+            </div>
+            ${currentFoodList.length > 2 ? `
+              <button data-index="${index}" class="delete-food-btn text-rose-500 hover:text-rose-700 px-1.5 py-0.5 rounded hover:bg-rose-100 transition-colors">
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            ` : ''}
+          `;
+          foodListContainer.appendChild(li);
+        });
+
+        // 綁定刪除事件
+        document.querySelectorAll('.delete-food-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const idx = parseInt(e.currentTarget.getAttribute('data-index'), 10);
+            currentFoodList.splice(idx, 1);
+            renderFoodList();
+          });
+        });
+      }
+
+      // 展開/收合清單
+      toggleListBtn.addEventListener('click', () => {
+        listModal.classList.toggle('hidden');
+        toggleIcon.classList.toggle('rotate-180');
+      });
+
+      // 手動新增店家
+      addFoodBtn.addEventListener('click', () => {
+        const val = newFoodInput.value.trim();
+        if (val) {
+          currentFoodList.push({
+            name: val,
+            tag: "✨ 自訂店家",
+            image: `https://placehold.co/600x400/FFB703/FFFFFF?text=${encodeURIComponent(val)}`,
+            query: val,
+            desc: "屬於你的特色私房美味名單！"
+          });
+          newFoodInput.value = '';
+          renderFoodList();
+        }
+      });
+
+      // 核心抽籤邏輯 (包含跑馬燈)
+      function startDrawProcess() {
+        if (isSpinning || currentFoodList.length === 0) return;
+        isSpinning = true;
+
+        // UI 轉為滾動狀態
+        drawBtn.disabled = true;
+        drawBtn.classList.add('opacity-80');
+        spinningHint.classList.remove('hidden');
+
+        let speed = 40;
+        let counter = 0;
+        const maxRolls = 22; // 轉動次數
+
+        // 隨機抽選最終贏家
+        const winner = currentFoodList[Math.floor(Math.random() * currentFoodList.length)];
+
+        function step() {
+          counter++;
+          const tempSelection = currentFoodList[Math.floor(Math.random() * currentFoodList.length)];
+          candidateDisplay.textContent = `🎰 ${tempSelection.name}`;
+          playAudioTick();
+
+          if (counter < maxRolls) {
+            if (counter > maxRolls - 6) {
+              speed += 45; // 逐漸減速
+            } else if (counter > maxRolls - 12) {
+              speed += 15;
             }
+            setTimeout(step, speed);
+          } else {
+            // 結束轉動，展示結果
+            displayWinner(winner);
+          }
+        }
 
-            // 防呆載入：無論網頁是在載入中或已完成，都一定能正確綁定
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', bindEvents);
-            } else {
-                bindEvents();
-            }
-        })();
-    </script>
+        step();
+      }
+
+      // 呈現抽籤結果 (依需求：用生動彈跳動畫替換大標題)
+      function displayWinner(food) {
+        playVictorySound();
+
+        // 五彩繽紛慶祝紙花
+        if (typeof confetti === 'function') {
+          confetti({
+            particleCount: 90,
+            spread: 80,
+            origin: { y: 0.6 },
+            colors: ['#FFB703', '#FB8500', '#10B981', '#E65100']
+          });
+        }
+
+        // 1. 生動彈跳動畫 (Super Bounce) 替換大標題
+        titleText.textContent = `✨ 今天就吃：${food.name}！`;
+        mainTitle.classList.remove('animate-super-bounce');
+        void mainTitle.offsetWidth; // 觸發 DOM 重繪
+        mainTitle.classList.add('animate-super-bounce');
+        subTitle.textContent = `命運為你選擇了美味的 ${food.name}！`;
+
+        // 2. 設置結果卡片資訊
+        resultFoodName.textContent = food.name;
+        resultFoodTag.textContent = food.tag || "🍱 推薦美食";
+        resultFoodImg.src = food.image;
+        resultFoodImg.alt = food.name;
+        resultFoodDesc.textContent = food.desc || "充滿驚喜與好滋味，馬上出發去品嚐吧！";
+
+        // 3. 設定 Google Maps 搜尋連結
+        mapBtn.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(food.query || food.name)}`;
+
+        // 4. 切換顯示區塊，並為結果卡片套用彈跳動畫
+        slotDisplaySection.classList.add('hidden');
+        resultCardSection.classList.remove('hidden');
+        resultCardSection.classList.remove('animate-super-bounce');
+        void resultCardSection.offsetWidth;
+        resultCardSection.classList.add('animate-super-bounce', 'flex');
+
+        // 狀態重設
+        isSpinning = false;
+        spinningHint.classList.add('hidden');
+        drawBtn.disabled = false;
+        drawBtn.classList.remove('opacity-80');
+      }
+
+      // 重置頁面狀態 (再試一次)
+      function resetToMain() {
+        mainTitle.classList.remove('animate-super-bounce');
+        titleText.textContent = '今天吃什麼？';
+        subTitle.textContent = '點擊下方大按鈕，交給命運選出今天的美味！';
+
+        candidateDisplay.textContent = '🎲 等你來抽！';
+        
+        resultCardSection.classList.add('hidden');
+        resultCardSection.classList.remove('animate-super-bounce', 'flex');
+        slotDisplaySection.classList.remove('hidden');
+      }
+
+      // 事件綁定
+      drawBtn.addEventListener('click', startDrawProcess);
+      retryBtn.addEventListener('click', resetToMain);
+
+      // 初始化菜單
+      renderFoodList();
+
+    });
+  </script>
 </body>
 </html>
