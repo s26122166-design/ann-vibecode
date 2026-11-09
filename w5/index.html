@@ -3,46 +3,34 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>雲端心電感應 | 多人默契遊戲</title>
+  <title>雲端心電感應 - 多人默契遊戲</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Confetti 慶祝特效 -->
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  <!-- 雲端字體 -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
-
   <script>
     tailwind.config = {
       theme: {
         extend: {
           colors: {
             morandi: {
-              bg: '#F7F5F0',        // 柔和燕麥白
-              card: '#FFFFFF',      // 卡片白
-              slate: '#8DA4B4',     // 莫蘭迪灰藍
-              rose: '#C89B8C',      // 莫蘭迪粉玫瑰
-              sage: '#8B9B90',      // 莫蘭迪鼠尾草綠
-              sand: '#E6DFD5',      // 莫蘭迪沙色
-              muted: '#94A3B8',     // 靜謐灰
-              dark: '#4A5568'       // 深石灰文字
+              bg: '#F7F5F0',        // 燕麥奶底色
+              card: '#FFFFFF',      // 純白卡片
+              primary: '#8DA4B4',   // 霧藍主色
+              primaryDark: '#768D9D',
+              secondary: '#C89B8C', // 莫蘭迪粉玫瑰
+              secondaryDark: '#B38576',
+              sage: '#8B9B90',      // 鼠尾草綠
+              text: '#4A5568',      // 深灰字體
+              subtext: '#94A3B8',   // 淺灰字體
+              border: '#E2E8F0',
+              highlight: '#F0E6DF'
             }
-          },
-          fontFamily: {
-            sans: ['"Zen Maru Gothic"', 'sans-serif'],
           }
         }
       }
     }
   </script>
-
   <style>
-    body {
-      background-color: #F7F5F0;
-      color: #4A5568;
-    }
-    /* 3D 翻牌動畫相關 CSS */
+    /* 3D 卡片翻轉 CSS */
     .perspective-1000 {
       perspective: 1000px;
     }
@@ -50,8 +38,8 @@
       transform-style: preserve-3d;
     }
     .backface-hidden {
-      -webkit-backface-visibility: hidden;
       backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
     }
     .rotate-y-180 {
       transform: rotateY(180deg);
@@ -59,70 +47,502 @@
     .card-inner {
       transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
     }
-    .card-flipped {
-      transform: rotateY(180deg);
-    }
   </style>
 </head>
-<body class="min-h-screen flex flex-col font-sans selection:bg-morandi-rose selection:text-white">
+<body class="bg-morandi-bg text-morandi-text min-h-screen font-sans relative antialiased selection:bg-morandi-secondary selection:text-white">
 
-  <!-- 頂部導覽列 -->
-  <header class="w-full bg-white/70 backdrop-blur-md border-b border-morandi-sand sticky top-0 z-40 px-4 py-3">
-    <div class="max-w-4xl mx-auto flex items-center justify-between">
-      <div class="flex items-center space-x-2">
-        <span class="text-2xl">✨</span>
-        <h1 class="text-xl font-bold tracking-wide text-morandi-dark">雲端心電感應</h1>
-        <span id="room-badge" class="hidden text-xs bg-morandi-sand/60 text-morandi-dark px-2.5 py-1 rounded-full font-medium">
-          房間：<span id="display-room-id">----</span>
-        </span>
-      </div>
+  <!-- 慶祝特效 Canvas -->
+  <canvas id="confettiCanvas" class="pointer-events-none fixed inset-0 z-50 w-full h-full"></canvas>
 
-      <!-- 右側控制項與隱藏房主按鈕 -->
+  <div id="app" class="max-w-4xl mx-auto px-4 py-6">
+
+    <!-- 頂部 Header 與 隱藏房主開關 -->
+    <header class="flex justify-between items-center bg-white/80 backdrop-blur border border-morandi-border rounded-2xl p-4 shadow-sm mb-6">
       <div class="flex items-center space-x-3">
-        <!-- 隱藏房主開關按鈕 (點擊切換房主權限) -->
-        <button id="secret-host-toggle" title="隱藏房主控制開關" class="p-2 text-morandi-muted hover:text-morandi-rose transition-colors duration-200 rounded-full hover:bg-morandi-sand/30">
-          <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z"/>
-          </svg>
+        <div class="w-10 h-10 rounded-xl bg-morandi-primary flex items-center justify-center text-white text-xl font-bold shadow-inner">
+          🔮
+        </div>
+        <div>
+          <h1 class="text-xl font-bold text-morandi-text tracking-wide">雲端心電感應</h1>
+          <p class="text-xs text-morandi-subtext">多人默契考驗 • 3D 揭曉</p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-3">
+        <!-- 房間號碼標籤 -->
+        <div id="roomBadge" class="hidden bg-morandi-bg border border-morandi-border px-3 py-1.5 rounded-lg text-xs font-semibold text-morandi-text">
+          房號：<span id="displayRoomCode" class="text-morandi-primary font-bold">----</span>
+        </div>
+        
+        <!-- 玩家暱稱標籤 -->
+        <div id="userBadge" class="hidden bg-morandi-primary/10 border border-morandi-primary/20 px-3 py-1.5 rounded-lg text-xs font-semibold text-morandi-primary">
+          <span id="displayPlayerName">---</span>
+        </div>
+
+        <!-- 隱藏房主控制台觸發按鈕 (👑 皇冠按鈕) -->
+        <button id="secretHostBtn" onclick="toggleHostControls()" class="p-2 rounded-xl text-morandi-subtext hover:text-morandi-secondary hover:bg-morandi-highlight/50 transition-all duration-200" title="房主切換點">
+          👑
         </button>
-        <div id="user-profile-badge" class="hidden flex items-center space-x-2 text-sm text-morandi-dark bg-morandi-bg px-3 py-1.5 rounded-full border border-morandi-sand">
-          <span class="w-2 h-2 rounded-full bg-morandi-sage animate-pulse"></span>
-          <span id="display-user-name" class="font-medium">玩家</span>
-          <span id="host-indicator" class="hidden text-xs bg-morandi-rose text-white px-1.5 py-0.5 rounded font-bold">房主</span>
-        </div>
       </div>
-    </div>
-  </header>
+    </header>
 
-  <!-- 主要內容區 -->
-  <main class="flex-1 max-w-4xl w-full mx-auto p-4 md:p-6">
-
-    <!-- 1. 登入 / 大廳頁面 -->
-    <section id="login-view" class="max-w-md mx-auto mt-8 bg-white rounded-3xl p-8 shadow-sm border border-morandi-sand">
+    <!-- 1. 登入與建房 Modal -->
+    <section id="loginSection" class="max-w-md mx-auto my-12 bg-white rounded-3xl p-8 border border-morandi-border shadow-sm">
       <div class="text-center mb-6">
-        <div class="inline-block p-4 rounded-full bg-morandi-bg text-4xl mb-3">🔮</div>
-        <h2 class="text-2xl font-bold text-morandi-dark">進入默契考驗</h2>
-        <p class="text-sm text-morandi-muted mt-1">輸入名字與房間代碼即可加入對戰</p>
+        <div class="text-4xl mb-2">✨</div>
+        <h2 class="text-2xl font-bold text-morandi-text">加入默契挑戰</h2>
+        <p class="text-xs text-morandi-subtext mt-1">請輸入玩家暱稱與房間代碼</p>
       </div>
 
-      <form id="join-form" class="space-y-4">
+      <div class="space-y-4">
         <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-morandi-muted mb-1">您的暱稱</label>
-          <input type="text" id="input-username" required placeholder="例如：小明" class="w-full px-4 py-3 rounded-xl bg-morandi-bg border border-morandi-sand focus:outline-none focus:ring-2 focus:ring-morandi-slate transition">
+          <label class="block text-xs font-semibold text-morandi-text mb-1">玩家暱稱</label>
+          <input type="text" id="playerNameInput" placeholder="例如：小明" class="w-full px-4 py-3 rounded-xl border border-morandi-border focus:outline-none focus:ring-2 focus:ring-morandi-primary/50 text-sm">
         </div>
+
         <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-morandi-muted mb-1">房間代碼 (4位數)</label>
-          <input type="text" id="input-roomid" required placeholder="例如：8888" maxlength="6" class="w-full px-4 py-3 rounded-xl bg-morandi-bg border border-morandi-sand focus:outline-none focus:ring-2 focus:ring-morandi-slate uppercase font-mono transition">
+          <label class="block text-xs font-semibold text-morandi-text mb-1">房間代碼</label>
+          <input type="text" id="roomCodeInput" placeholder="請輸入 4 位數代碼 (如: 8888)" class="w-full px-4 py-3 rounded-xl border border-morandi-border focus:outline-none focus:ring-2 focus:ring-morandi-primary/50 text-sm tracking-wider uppercase">
         </div>
-        <div class="pt-2 flex gap-3">
-          <button type="submit" class="flex-1 bg-morandi-slate hover:bg-morandi-dark text-white font-medium py-3 rounded-xl transition shadow-sm active:scale-95">
-            加入遊戲
+
+        <div class="grid grid-cols-2 gap-3 pt-2">
+          <button onclick="joinGame(false)" class="w-full py-3 bg-morandi-primary text-white text-sm font-semibold rounded-xl hover:bg-morandi-primaryDark transition shadow-sm">
+            加入房間
           </button>
-          <button type="button" id="quick-create-btn" class="bg-morandi-sand hover:bg-morandi-rose hover:text-white text-morandi-dark font-medium px-4 py-3 rounded-xl transition active:scale-95">
-            隨機開房
+          <button onclick="joinGame(true)" class="w-full py-3 bg-morandi-secondary text-white text-sm font-semibold rounded-xl hover:bg-morandi-secondaryDark transition shadow-sm">
+            建立新房間
           </button>
         </div>
-      </form>
+      </div>
     </section>
 
-    <!-- 2. 遊戲房間頁面
+    <!-- 2. 主遊戲區域 (預設隱藏) -->
+    <main id="gameSection" class="hidden space-y-6">
+
+      <!-- 隱藏房主控制台 (點擊 👑 切換顯示/隱藏) -->
+      <section id="hostControlPanel" class="hidden bg-morandi-highlight/60 border border-morandi-secondary/30 rounded-2xl p-5 shadow-sm transition-all duration-300">
+        <div class="flex items-center justify-between mb-3 border-b border-morandi-secondary/20 pb-2">
+          <span class="text-xs font-bold text-morandi-secondary tracking-wider uppercase flex items-center gap-1">
+            <span>👑</span> 房主控制台 (Hidden Host Console)
+          </span>
+          <span class="text-[10px] text-morandi-subtext bg-white/70 px-2 py-0.5 rounded-full">同步控制中</span>
+        </div>
+
+        <div class="space-y-4">
+          <!-- 出題區 -->
+          <div>
+            <label class="block text-xs font-semibold text-morandi-text mb-1">設定本輪題目：</label>
+            <div class="flex gap-2">
+              <input type="text" id="hostQuestionInput" placeholder="輸入題目，例如：說到夏天會想到？" class="flex-1 px-4 py-2 rounded-xl border border-morandi-border text-sm focus:outline-none focus:ring-2 focus:ring-morandi-secondary/50">
+              <button onclick="setQuestion()" class="px-5 py-2 bg-morandi-secondary text-white text-sm font-medium rounded-xl hover:bg-morandi-secondaryDark transition">
+                發布題目
+              </button>
+            </div>
+            
+            <!-- 快速預設題目 -->
+            <div class="flex flex-wrap gap-2 mt-2">
+              <span class="text-xs text-morandi-subtext flex items-center">快選題庫：</span>
+              <button onclick="quickSelectQuestion('今晚宵夜最想吃什麼？')" class="text-xs bg-white border border-morandi-border px-2.5 py-1 rounded-lg hover:border-morandi-secondary transition">今晚宵夜？</button>
+              <button onclick="quickSelectQuestion('說到夏天第一個想到的水果？')" class="text-xs bg-white border border-morandi-border px-2.5 py-1 rounded-lg hover:border-morandi-secondary transition">夏天水果？</button>
+              <button onclick="quickSelectQuestion('去 KTV 必點的經典神曲？')" class="text-xs bg-white border border-morandi-border px-2.5 py-1 rounded-lg hover:border-morandi-secondary transition">KTV 必點？</button>
+            </div>
+          </div>
+
+          <!-- 房主動作控制按鈕 -->
+          <div class="flex flex-wrap gap-3 pt-1">
+            <button onclick="triggerReveal(true)" class="flex-1 py-2.5 bg-morandi-primary text-white text-sm font-bold rounded-xl hover:bg-morandi-primaryDark transition shadow flex items-center justify-center gap-1.5">
+              <span>🎴</span> 3D 同步開牌 (Reveal)
+            </button>
+            <button onclick="resetRound()" class="px-4 py-2.5 bg-white border border-morandi-border text-morandi-text text-sm font-medium rounded-xl hover:bg-morandi-bg transition">
+              🔄 下一題 / 重置
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- 當前題目展示卡片 -->
+      <section class="bg-white rounded-2xl p-6 border border-morandi-border shadow-sm text-center relative overflow-hidden">
+        <div class="absolute -right-6 -top-6 w-20 h-20 bg-morandi-primary/10 rounded-full blur-xl pointer-events-none"></div>
+        <span class="text-xs font-bold text-morandi-sage tracking-widest uppercase bg-morandi-sage/10 px-3 py-1 rounded-full">Current Question</span>
+        <h2 id="currentQuestionDisplay" class="text-2xl font-bold text-morandi-text mt-3 mb-2">等待房主出題中...</h2>
+        <p class="text-xs text-morandi-subtext">請在下方填寫答案，全體完成後由房主統一開牌！</p>
+      </section>
+
+      <!-- 玩家答題區 -->
+      <section class="bg-white rounded-2xl p-5 border border-morandi-border shadow-sm">
+        <div class="flex flex-col sm:flex-row gap-3">
+          <input type="text" id="playerAnswerInput" placeholder="輸入你的默契答案..." class="flex-1 px-4 py-3 rounded-xl border border-morandi-border text-sm focus:outline-none focus:ring-2 focus:ring-morandi-primary/50">
+          <button onclick="submitAnswer()" class="px-6 py-3 bg-morandi-sage text-white text-sm font-bold rounded-xl hover:bg-morandi-sage/90 transition shadow-sm flex items-center justify-center gap-2">
+            <span>✍️</span> 送出答案
+          </button>
+        </div>
+        <div id="answerStatus" class="mt-2 text-xs text-morandi-subtext flex items-center gap-1">
+          <span>狀態：</span><span id="answerStatusText" class="text-amber-600 font-medium">尚未作答</span>
+        </div>
+      </section>
+
+      <!-- 玩家 3D 翻牌展示區 -->
+      <section>
+        <div class="flex justify-between items-center mb-4 px-1">
+          <h3 class="text-sm font-bold text-morandi-text flex items-center gap-2">
+            <span>👥</span> 玩家卡片牆 (<span id="playerCount">0</span> 人)
+          </h3>
+          <span id="revealStateBadge" class="text-xs px-2.5 py-1 rounded-full bg-slate-200 text-slate-600">蓋牌中 🔮</span>
+        </div>
+
+        <div id="cardsGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          <!-- 翻牌卡片由 JS 動態生成 -->
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <script>
+    // --- GAS 設定與全域變數 ---
+    const SHEET_NAME = 'TelepathyData';
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyfOrHPnWr18cFk-n-aW-Gl9clJ5cu@@NygBDBeCu5BjX8n1cmK_fU_yCEVAms5xShEeA/exec";
+
+    let state = {
+      roomCode: '',
+      playerName: '',
+      isHost: false,
+      question: '等待房主出題...',
+      isRevealed: false,
+      answers: {}
+    };
+
+    let pollingTimer = null;
+    let localBroadcast = null;
+    let hasPlayedEffect = false;
+
+    // --- 初始化與事件備援 ---
+    window.addEventListener('DOMContentLoaded', () => {
+      // 本地多 Tab 廣播備援
+      if (typeof BroadcastChannel !== 'undefined') {
+        localBroadcast = new BroadcastChannel('telepathy_game_channel');
+        localBroadcast.onmessage = (e) => {
+          if (e.data && e.data.roomCode === state.roomCode) {
+            updateUIState(e.data);
+          }
+        };
+      }
+    });
+
+    // --- 登入 / 建立房間 ---
+    function joinGame(isCreating) {
+      const name = document.getElementById('playerNameInput').value.trim();
+      let room = document.getElementById('roomCodeInput').value.trim().toUpperCase();
+
+      if (!name) {
+        alert('請先輸入暱稱！');
+        return;
+      }
+
+      if (isCreating) {
+        room = Math.floor(1000 + Math.random() * 9000).toString();
+        state.isHost = true;
+      } else if (!room) {
+        alert('請輸入房間代碼！');
+        return;
+      }
+
+      state.playerName = name;
+      state.roomCode = room;
+
+      // 更新 UI 顯示標籤
+      document.getElementById('displayRoomCode').innerText = room;
+      document.getElementById('displayPlayerName').innerText = name;
+      document.getElementById('roomBadge').classList.remove('hidden');
+      document.getElementById('userBadge').classList.remove('hidden');
+
+      if (state.isHost) {
+        document.getElementById('hostControlPanel').classList.remove('hidden');
+      }
+
+      document.getElementById('loginSection').classList.add('hidden');
+      document.getElementById('gameSection').classList.remove('hidden');
+
+      // 啟動 2 秒輪詢
+      startPolling();
+      fetchGameState();
+    }
+
+    // --- 隱藏房主控制台開關 (點擊右上角 👑 皇冠) ---
+    function toggleHostControls() {
+      state.isHost = !state.isHost;
+      const panel = document.getElementById('hostControlPanel');
+      if (state.isHost) {
+        panel.classList.remove('hidden');
+        showToast('已開啟隱藏房主控制台 👑');
+      } else {
+        panel.classList.add('hidden');
+        showToast('已關閉房主控制台');
+      }
+    }
+
+    // --- 房主操作 (Host Actions) ---
+    function quickSelectQuestion(q) {
+      document.getElementById('hostQuestionInput').value = q;
+    }
+
+    function setQuestion() {
+      const q = document.getElementById('hostQuestionInput').value.trim();
+      if (!q) return alert('請輸入題目內容');
+      state.question = q;
+      state.isRevealed = false;
+      hasPlayedEffect = false;
+      syncStateToBackend();
+    }
+
+    function triggerReveal(reveal) {
+      state.isRevealed = reveal;
+      syncStateToBackend();
+    }
+
+    function resetRound() {
+      state.question = '等待房主出題...';
+      state.isRevealed = false;
+      state.answers = {};
+      document.getElementById('hostQuestionInput').value = '';
+      document.getElementById('playerAnswerInput').value = '';
+      document.getElementById('answerStatusText').innerText = '尚未作答';
+      document.getElementById('answerStatusText').className = 'text-amber-600 font-medium';
+      hasPlayedEffect = false;
+      syncStateToBackend();
+    }
+
+    // --- 玩家提交答案 ---
+    function submitAnswer() {
+      const ans = document.getElementById('playerAnswerInput').value.trim();
+      if (!ans) return alert('請輸入答案');
+      
+      state.answers[state.playerName] = ans;
+      document.getElementById('answerStatusText').innerText = `已送出答案：${ans}`;
+      document.getElementById('answerStatusText').className = 'text-morandi-sage font-bold';
+      
+      syncStateToBackend();
+    }
+
+    // --- 2 秒 Polling 輪詢與 GAS API 同步機制 ---
+    function startPolling() {
+      if (pollingTimer) clearInterval(pollingTimer);
+      pollingTimer = setInterval(() => {
+        fetchGameState();
+      }, 2000);
+    }
+
+    async function fetchGameState() {
+      if (!state.roomCode) return;
+
+      // 1. 本地 LocalStorage 快取與備援
+      const localData = localStorage.getItem(`room_${state.roomCode}`);
+      if (localData) {
+        try {
+          const parsed = JSON.parse(localData);
+          updateUIState(parsed);
+        } catch (e) {}
+      }
+
+      // 2. 向 GAS 雲端 API 輪詢最新狀態
+      try {
+        const res = await fetch(`${GAS_API_URL}?action=get&room=${state.roomCode}&sheet=${SHEET_NAME}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.roomCode) {
+            updateUIState(data);
+          }
+        }
+      } catch (err) {
+        // API 靜態輪詢備援中
+      }
+    }
+
+    async function syncStateToBackend() {
+      // 寫入本地與廣播通道
+      localStorage.setItem(`room_${state.roomCode}`, JSON.stringify(state));
+      if (localBroadcast) {
+        localBroadcast.postMessage(state);
+      }
+      updateUIState(state);
+
+      // POST 寫入 GAS API 雲端試算表
+      try {
+        await fetch(GAS_API_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sheet: SHEET_NAME,
+            roomCode: state.roomCode,
+            data: state
+          })
+        });
+      } catch (e) {}
+    }
+
+    // --- 畫面更新與 3D 翻牌渲染 ---
+    function updateUIState(newState) {
+      const isHostKeep = state.isHost;
+      const myNameKeep = state.playerName;
+      
+      state = { ...newState, isHost: isHostKeep, playerName: myNameKeep };
+
+      // 題目顯示
+      document.getElementById('currentQuestionDisplay').innerText = state.question || '等待房主出題...';
+
+      // 狀態標籤
+      const badge = document.getElementById('revealStateBadge');
+      if (state.isRevealed) {
+        badge.innerText = '已開牌 ✨';
+        badge.className = 'text-xs px-2.5 py-1 rounded-full bg-morandi-secondary text-white font-bold';
+      } else {
+        badge.innerText = '蓋牌中 🔮';
+        badge.className = 'text-xs px-2.5 py-1 rounded-full bg-slate-200 text-slate-600';
+      }
+
+      // 玩家統計與答案比對
+      const playerNames = Object.keys(state.answers || {});
+      document.getElementById('playerCount').innerText = playerNames.length;
+
+      const answerCounts = {};
+      Object.values(state.answers || {}).forEach(ans => {
+        if (ans) answerCounts[ans] = (answerCounts[ans] || 0) + 1;
+      });
+
+      // 繪製 3D 翻牌卡片牆
+      const grid = document.getElementById('cardsGrid');
+      grid.innerHTML = '';
+
+      if (playerNames.length === 0) {
+        grid.innerHTML = `<div class="col-span-full text-center py-8 text-morandi-subtext text-xs">尚無玩家填答，等待大家都寫好答案...</div>`;
+        return;
+      }
+
+      playerNames.forEach(name => {
+        const ans = state.answers[name];
+        const isMatch = state.isRevealed && answerCounts[ans] > 1;
+
+        const card = document.createElement('div');
+        card.className = 'perspective-1000 h-36 w-full cursor-pointer';
+        
+        card.innerHTML = `
+          <div class="card-inner relative w-full h-full transform-style-3d ${state.isRevealed ? 'rotate-y-180' : ''}">
+            <!-- 卡片正面 (蓋牌) -->
+            <div class="backface-hidden absolute inset-0 bg-white border-2 border-morandi-border rounded-2xl p-4 flex flex-col justify-between items-center shadow-sm hover:border-morandi-primary transition">
+              <div class="w-8 h-8 rounded-full bg-morandi-bg flex items-center justify-center text-xs font-bold text-morandi-primary">
+                ${name.slice(0, 1)}
+              </div>
+              <div class="text-sm font-bold text-morandi-text">${name}</div>
+              <div class="text-[10px] text-morandi-subtext bg-morandi-bg px-2 py-0.5 rounded-full flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-morandi-sage animate-pulse"></span> 已準備
+              </div>
+            </div>
+
+            <!-- 卡片背面 (開牌揭曉) -->
+            <div class="backface-hidden rotate-y-180 absolute inset-0 ${isMatch ? 'bg-morandi-highlight border-2 border-morandi-secondary' : 'bg-white border border-morandi-border'} rounded-2xl p-4 flex flex-col justify-between items-center shadow-md">
+              <div class="text-xs font-semibold text-morandi-subtext">${name} 的答案</div>
+              <div class="text-lg font-bold ${isMatch ? 'text-morandi-secondary scale-110' : 'text-morandi-text'} transition-transform duration-300">
+                ${ans || '未作答'}
+              </div>
+              ${isMatch ? '<span class="text-[10px] bg-morandi-secondary text-white px-2 py-0.5 rounded-full font-bold shadow-sm animate-bounce">默契成功 💖</span>' : '<span class="text-[10px] text-morandi-subtext">心電感應中...</span>'}
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+
+      // 觸發音效與 Confetti
+      if (state.isRevealed && !hasPlayedEffect) {
+        hasPlayedEffect = true;
+        playRevealSound();
+        if (Object.values(answerCounts).some(c => c > 1)) {
+          triggerConfetti();
+        }
+      }
+    }
+
+    // --- Web Audio API 開牌音效 ---
+    function playRevealSound() {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        
+        [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.08);
+          gain.gain.setValueAtTime(0.15, ctx.currentTime + idx * 0.08);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.08 + 0.3);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(ctx.currentTime + idx * 0.08);
+          osc.stop(ctx.currentTime + idx * 0.08 + 0.3);
+        });
+      } catch (e) {}
+    }
+
+    // --- Toast 提示訊息 ---
+    function showToast(msg) {
+      const toast = document.createElement('div');
+      toast.className = 'fixed bottom-5 right-5 bg-morandi-text text-white text-xs px-4 py-2.5 rounded-xl shadow-lg z-50 transition-all duration-300 transform translate-y-2 opacity-0';
+      toast.innerText = msg;
+      document.body.appendChild(toast);
+      setTimeout(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      }, 10);
+      setTimeout(() => {
+        toast.classList.add('opacity-0');
+        setTimeout(() => toast.remove(), 300);
+      }, 2000);
+    }
+
+    // --- Canvas 彩帶花屑慶祝動畫 ---
+    function triggerConfetti() {
+      const canvas = document.getElementById('confettiCanvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const colors = ['#8DA4B4', '#C89B8C', '#8B9B90', '#D4A373', '#E2E8F0'];
+      const particles = Array.from({ length: 60 }, () => ({
+        x: Math.random() * canvas.width,
+        y: -10,
+        size: Math.random() * 8 + 4,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        speedY: Math.random() * 3 + 2,
+        speedX: (Math.random() - 0.5) * 2,
+        rotation: Math.random() * 360,
+        spin: (Math.random() - 0.5) * 10
+      }));
+
+      let frame = 0;
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+          p.y += p.speedY;
+          p.x += p.speedX;
+          p.rotation += p.spin;
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rotation * Math.PI) / 180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+          ctx.restore();
+        });
+
+        frame++;
+        if (frame < 120) {
+          requestAnimationFrame(animate);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      }
+      animate();
+    }
+  </script>
+</body>
+</html>
