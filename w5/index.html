@@ -87,7 +87,7 @@
   <!-- 頂部導覽列 Header -->
   <header class="bg-white/80 backdrop-blur-md shadow-sm border-b border-morandi-rose/30 sticky top-0 z-40">
     <div class="max-w-5xl mx-auto px-4 py-3 flex justify-between items-center">
-      <div class="flex items-center space-x-3 cursor-pointer" id="headerTitle" onclick="handleHeaderClick()" title="連續點擊 3 次可解鎖房主權限">
+      <div class="flex items-center space-x-3 cursor-pointer" id="headerTitle" onclick="handleHeaderClick()" title="連續點擊 3 次解鎖房主權限">
         <div class="w-10 h-10 rounded-2xl bg-morandi-blue text-white flex items-center justify-center font-bold text-xl shadow-md">
           🧠
         </div>
@@ -107,7 +107,7 @@
           <span id="currentAvatar">🐶</span> <span id="currentNickname">玩家</span>
         </div>
 
-        <!-- 隱藏房主控制台解鎖按鈕 (預設極低透明度) -->
+        <!-- 隱藏房主控制台解鎖按鈕 -->
         <button id="secretHostBtn" onclick="toggleHostModal()" title="隱藏房主控制台" class="p-2 rounded-full hover:bg-morandi-sand text-morandi-dark/20 hover:text-morandi-dark transition opacity-30 hover:opacity-100">
           <i id="hostLockIcon" class="fa-solid fa-lock text-sm"></i>
         </button>
@@ -316,7 +316,7 @@
       localStorage.setItem('telepathy_player_id', localPlayerId);
     }
 
-    // 全域狀態
+    // 全域狀態 (包含 roundId 以正確處理重置)
     let state = {
       roomCode: '',
       nickname: '',
@@ -324,7 +324,8 @@
       isHost: false,
       question: '等待房主出題中...',
       isRevealed: false,
-      players: [] // [{ id, nickname, avatar, answer, timestamp }]
+      roundId: Date.now(),
+      players: []
     };
 
     let headerClickCounter = 0;
@@ -337,10 +338,7 @@
       // 監聽跨視窗廣播
       syncChannel.onmessage = (event) => {
         if (event.data && event.data.roomCode === state.roomCode) {
-          state.question = event.data.question;
-          state.isRevealed = event.data.isRevealed;
-          state.players = event.data.players || [];
-          renderGameView();
+          syncRemoteState(event.data);
         }
       };
       
@@ -383,7 +381,7 @@
     }
 
     // =========================================
-    // 加入房間與 Polling
+    // 加入房間與 Polling (修復覆蓋舊玩家問題)
     // =========================================
     function joinRoom() {
       const nick = document.getElementById('nicknameInput').value.trim();
@@ -401,7 +399,23 @@
       state.nickname = nick;
       state.roomCode = code;
 
-      // 更新 UI
+      // 1. 優先載入既有房間快取，避免把在線玩家衝掉
+      const saved = localStorage.getItem(`telepathy_room_${code}`);
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          state.question = parsed.question || state.question;
+          state.isRevealed = parsed.isRevealed || false;
+          state.roundId = parsed.roundId || state.roundId;
+          if (Array.isArray(parsed.players)) {
+            state.players = parsed.players;
+          }
+        } catch (e) {
+          console.error('解析房間快取失敗', e);
+        }
+      }
+
+      // 2. 更新 UI
       document.getElementById('currentRoomCode').innerText = code;
       document.getElementById('currentNickname').innerText = nick;
       document.getElementById('currentAvatar').innerText = state.avatar;
@@ -412,10 +426,10 @@
       document.getElementById('loginSection').classList.add('hidden');
       document.getElementById('gameSection').classList.remove('hidden');
 
-      // 註冊玩家
+      // 3. 註冊自己並廣播
       registerPlayer();
 
-      // 啟動 2 秒 Polling 輪詢
+      // 4. 啟動 2 秒 Polling 輪詢
       startPolling();
     }
 
@@ -460,21 +474,7 @@
         if (response.ok) {
           const data = await response.json();
           if (data && data.roomCode === state.roomCode) {
-            state.question = data.question || state.question;
-            state.isRevealed = data.isRevealed || false;
-            
-            // 合併時保留本地端剛輸入的答案，避免 Polling 覆蓋
-            if (data.players && Array.isArray(data.players)) {
-              const myLocal = state.players.find(p => p.id === localPlayerId);
-              state.players = data.players;
-              if (myLocal && myLocal.answer) {
-                const myRemote = state.players.find(p => p.id === localPlayerId);
-                if (myRemote && !myRemote.answer) {
-                  myRemote.answer = myLocal.answer;
-                }
-              }
-            }
-            renderGameView();
+            syncRemoteState(data);
           }
         } else {
           fallbackLocalSync();
@@ -487,15 +487,48 @@
     function fallbackLocalSync() {
       const saved = localStorage.getItem(`telepathy_room_${state.roomCode}`);
       if (saved) {
-        const parsed = JSON.parse(saved);
-        state.question = parsed.question || state.question;
-        state.isRevealed = parsed.isRevealed || false;
-        
-        if (parsed.players) {
-          state.players = parsed.players;
-        }
-        renderGameView();
+        try {
+          const parsed = JSON.parse(saved);
+          syncRemoteState(parsed);
+        } catch (e) {}
       }
+    }
+
+    // 統一的多人狀態合併邏輯 (Merge)
+    function syncRemoteState(remoteData) {
+      if (!remoteData || remoteData.roomCode !== state.roomCode) return;
+
+      const isNewRound = remoteData.roundId && remoteData.roundId !== state.roundId;
+
+      state.question = remoteData.question || state.question;
+      state.isRevealed = remoteData.isRevealed || false;
+      if (remoteData.roundId) state.roundId = remoteData.roundId;
+
+      if (Array.isArray(remoteData.players)) {
+        const playerMap = new Map();
+
+        // 以遠端資料為基礎
+        remoteData.players.forEach(rp => {
+          playerMap.set(rp.id, { ...rp });
+        });
+
+        // 合併本地玩家最新資訊
+        state.players.forEach(lp => {
+          if (!playerMap.has(lp.id)) {
+            playerMap.set(lp.id, lp);
+          } else {
+            const rp = playerMap.get(lp.id);
+            // 如果不是新輪次，保留本地剛填寫但尚未同步的答案
+            if (!isNewRound && lp.id === localPlayerId && lp.answer && !rp.answer) {
+              rp.answer = lp.answer;
+            }
+          }
+        });
+
+        state.players = Array.from(playerMap.values());
+      }
+
+      renderGameView();
     }
 
     async function broadcastState() {
@@ -504,14 +537,15 @@
         roomCode: state.roomCode,
         question: state.question,
         isRevealed: state.isRevealed,
+        roundId: state.roundId,
         players: state.players
       };
 
-      // 本地與頻道廣播
+      // 本地與廣播頻道發送
       localStorage.setItem(`telepathy_room_${state.roomCode}`, JSON.stringify(payload));
       syncChannel.postMessage(payload);
 
-      // 發送至 Google Apps Script
+      // 發送至 GAS 雲端
       try {
         await fetch(GAS_API_URL, {
           method: 'POST',
@@ -570,6 +604,8 @@
       }
       state.question = q;
       state.isRevealed = false;
+      state.roundId = Date.now();
+      state.players.forEach(p => p.answer = '');
       broadcastState();
       toggleHostModal();
     }
@@ -586,6 +622,7 @@
 
     function resetGameRound() {
       state.isRevealed = false;
+      state.roundId = Date.now(); // 更新輪次編號
       state.players.forEach(p => p.answer = '');
       document.getElementById('submittedTip').classList.add('hidden');
       document.getElementById('playerAnswerInput').value = '';
@@ -625,7 +662,7 @@
       document.getElementById('questionDisplay').innerText = state.question;
       document.getElementById('playerCount').innerText = state.players.length;
 
-      // 自動同步本地輸入框狀態 (下一輪重置時自動清空輸入框)
+      // 當輪次重置或本地無答案時，自動清空本地輸入框
       const me = state.players.find(p => p.id === localPlayerId);
       if (me && !me.answer) {
         document.getElementById('playerAnswerInput').value = '';
