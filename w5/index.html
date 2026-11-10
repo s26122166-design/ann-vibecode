@@ -19,7 +19,7 @@
                 extend: {
                     colors: {
                         morandi: {
-                            bg: '#F5F2EB',       /* 溫潤奶油奶茶色 */
+                            bg: '#F5F2EB',       /* 奶油奶茶色 */
                             card: '#FFFFFF',     /* 純白卡片 */
                             sage: '#8E9A86',     /* 靜謐草綠 */
                             sagedark: '#73806C',
@@ -48,7 +48,7 @@
             user-select: none;
         }
 
-        /* 3D 翻牌 CSS */
+        /* 3D 翻牌特效 CSS */
         .perspective-1000 {
             perspective: 1000px;
         }
@@ -65,13 +65,16 @@
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between selection:bg-morandi-rose selection:text-white">
+<body class="min-h-screen flex flex-col justify-between selection:bg-morandi-rose selection:text-white relative">
+
+    <!-- Toast 微通知訊息框 -->
+    <div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
     <!-- 頂部導覽列 -->
     <header class="bg-white/80 backdrop-blur-md border-b border-morandi-taupe/20 sticky top-0 z-40 px-4 py-3">
         <div class="max-w-4xl mx-auto flex items-center justify-between">
-            <!-- 隱藏解鎖觸發點：連續點擊此區塊 3 次 -->
-            <div class="flex items-center space-x-3 cursor-pointer select-none active:scale-95 transition-transform" onclick="handleSecretClick()" title="連續快速點擊 3 次解鎖隱藏房主">
+            <!-- 隱藏解鎖觸發點：1.5 秒內連續點擊此區塊 3 次 -->
+            <div class="flex items-center space-x-3 cursor-pointer select-none active:scale-95 transition-transform" onclick="handleSecretClick()" title="快速點擊 3 次解鎖隱藏房主">
                 <div class="w-9 h-9 rounded-full bg-morandi-sage text-white flex items-center justify-center shadow-sm">
                     <i class="fa-solid fa-brain text-lg"></i>
                 </div>
@@ -169,7 +172,7 @@
                     <i class="fa-solid fa-users text-morandi-slate"></i>
                     全員卡牌區 (<span id="playerCount">0</span>人)
                 </h3>
-                <span id="statusMessage" class="text-xs text-morandi-muted">數據連線同步中...</span>
+                <span id="statusMessage" class="text-xs text-morandi-muted">數據即時同步中...</span>
             </div>
 
             <div id="cardsGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
@@ -227,8 +230,8 @@
     <!-- 頁尾與隱藏控制按鈕 -->
     <footer class="py-4 px-4 text-center text-xs text-morandi-muted border-t border-morandi-taupe/10 bg-white/40">
         <div class="max-w-4xl mx-auto flex justify-between items-center">
-            <span>© 雲端心電感應 • 默契大考驗</span>
-            <!-- 預設為 hidden，解鎖後才會顯現 -->
+            <span>© 雲端心電感應 • 多人默契大考驗</span>
+            <!-- 預設隱藏，解鎖後顯示 -->
             <button id="secretHostBtn" onclick="toggleHostModal(true)" class="hidden text-morandi-taupe hover:text-morandi-rose transition-colors p-1" title="開啟房主控制台">
                 <i class="fa-solid fa-user-gear text-sm"></i>
             </button>
@@ -236,9 +239,37 @@
     </footer>
 
     <script>
+        // 設定常數
         const SHEET_NAME = 'TelepathyData';
         const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyf0rHPnWr18cFk-n-aWFGI9cTJ5cuQQNygBDBeCJ5BjX8n1cmK_fU_ycEvAms5xShEeA/exec";
 
+        // 防崩潰存取機制 (SafeStorage)
+        const memoryStorage = {};
+        const SafeStorage = {
+            getItem: (key) => {
+                try {
+                    return localStorage.getItem(key);
+                } catch (e) {
+                    return memoryStorage[key] || null;
+                }
+            },
+            setItem: (key, val) => {
+                try {
+                    localStorage.setItem(key, val);
+                } catch (e) {
+                    memoryStorage[key] = val;
+                }
+            },
+            removeItem: (key) => {
+                try {
+                    localStorage.removeItem(key);
+                } catch (e) {
+                    delete memoryStorage[key];
+                }
+            }
+        };
+
+        // 全域狀態
         let currentUser = {
             nickname: '',
             roomCode: '',
@@ -254,14 +285,61 @@
         let pollingInterval = null;
         let secretClickCount = 0;
         let secretClickTimer = null;
+        let broadcastChannel = null;
 
         // 初始化
         window.addEventListener('DOMContentLoaded', () => {
-            const savedNick = localStorage.getItem('telepathy_nick');
-            if (savedNick) document.getElementById('inputNickname').value = savedNick;
+            const savedNick = SafeStorage.getItem('telepathy_nick');
+            if (savedNick) {
+                const el = document.getElementById('inputNickname');
+                if (el) el.value = savedNick;
+            }
+
+            // 初始化廣播頻道
+            try {
+                broadcastChannel = new BroadcastChannel('telepathy_game_channel');
+                broadcastChannel.onmessage = (event) => {
+                    if (event.data && event.data.room === currentUser.roomCode) {
+                        fetchRoomData();
+                    }
+                };
+            } catch (e) {
+                console.log('BroadcastChannel not supported');
+            }
         });
 
-        // 修正後的暗號解鎖：1.5秒內快速點擊標題 3 次
+        // 廣播通知其他分頁同步
+        function notifyOtherTabs() {
+            if (broadcastChannel) {
+                broadcastChannel.postMessage({ room: currentUser.roomCode, timestamp: Date.now() });
+            }
+        }
+
+        // 自訂非阻塞式 Toast 通知
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            const bgClass = type === 'success' ? 'bg-morandi-sage text-white' : 
+                             type === 'error' ? 'bg-morandi-rose text-white' : 'bg-morandi-slate text-white';
+            
+            toast.className = `${bgClass} px-4 py-2.5 rounded-xl shadow-lg text-xs font-medium flex items-center gap-2 transition-all duration-300 transform translate-y-[-10px] opacity-0 pointer-events-auto`;
+            toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check' : 'fa-circle-info'}"></i> <span>${escapeHtml(message)}</span>`;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-y-[-10px]', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-[-10px]');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // 暗號解鎖：1.5秒內快速點擊標題 3 次
         function handleSecretClick() {
             secretClickCount++;
             
@@ -274,11 +352,10 @@
                 secretClickCount = 0;
                 currentUser.isHost = true;
                 
-                // 顯示房主 Badge 與隱藏的房主控制按鈕
                 document.getElementById('secretBadge').classList.remove('hidden');
                 document.getElementById('secretHostBtn').classList.remove('hidden');
                 
-                // 直接打開房主控制台
+                showToast('🔑 已成功解鎖隱藏房主控制權限！', 'success');
                 toggleHostModal(true);
             }
         }
@@ -286,16 +363,15 @@
         // 創建房間
         function createRoom() {
             const nick = document.getElementById('inputNickname').value.trim();
-            if (!nick) return alert('請輸入您的暱稱！');
+            if (!nick) return showToast('請先輸入您的暱稱！', 'error');
 
             const randomCode = Math.floor(1000 + Math.random() * 9000).toString();
             currentUser.nickname = nick;
             currentUser.roomCode = randomCode;
             currentUser.isHost = true;
 
-            localStorage.setItem('telepathy_nick', nick);
+            SafeStorage.setItem('telepathy_nick', nick);
             
-            // 房主自動開啟控制按鈕
             document.getElementById('secretBadge').classList.remove('hidden');
             document.getElementById('secretHostBtn').classList.remove('hidden');
 
@@ -308,13 +384,13 @@
             const nick = document.getElementById('inputNickname').value.trim();
             const code = document.getElementById('inputRoomCode').value.trim();
 
-            if (!nick) return alert('請輸入暱稱！');
-            if (!code) return alert('請輸入 4 位數房間代碼！');
+            if (!nick) return showToast('請輸入暱稱！', 'error');
+            if (!code) return showToast('請輸入 4 位數房間代碼！', 'error');
 
             currentUser.nickname = nick;
             currentUser.roomCode = code;
 
-            localStorage.setItem('telepathy_nick', nick);
+            SafeStorage.setItem('telepathy_nick', nick);
             enterGameUI();
         }
 
@@ -360,9 +436,9 @@
         async function submitAnswer() {
             const ansInput = document.getElementById('myAnswerInput');
             const answer = ansInput.value.trim();
-            if (!answer) return alert('請輸入答案！');
+            if (!answer) return showToast('請輸入答案！', 'error');
 
-            document.getElementById('statusMessage').textContent = '已鎖定答案！';
+            showToast('已鎖定答案！', 'success');
 
             try {
                 const url = `${GAS_API_URL}?sheet=${SHEET_NAME}&action=submit&room=${currentUser.roomCode}&nickname=${encodeURIComponent(currentUser.nickname)}&answer=${encodeURIComponent(answer)}`;
@@ -377,15 +453,16 @@
                 localPlayers.push({ nickname: currentUser.nickname, answer: answer });
             }
             saveLocalStorePlayers(localPlayers);
+            notifyOtherTabs();
             fetchRoomData();
         }
 
         async function hostUpdateQuestion(customQ) {
             const q = customQ || document.getElementById('hostQuestionInput').value.trim();
-            if (!q) return alert('請輸入題目內容');
+            if (!q) return showToast('請輸入題目內容', 'error');
 
-            localStorage.setItem(`room_q_${currentUser.roomCode}`, q);
-            localStorage.setItem(`room_rev_${currentUser.roomCode}`, 'false');
+            SafeStorage.setItem(`room_q_${currentUser.roomCode}`, q);
+            SafeStorage.setItem(`room_rev_${currentUser.roomCode}`, 'false');
 
             try {
                 const url = `${GAS_API_URL}?sheet=${SHEET_NAME}&action=setQuestion&room=${currentUser.roomCode}&question=${encodeURIComponent(q)}`;
@@ -394,13 +471,14 @@
 
             document.getElementById('hostQuestionInput').value = '';
             toggleHostModal(false);
+            showToast('題目已更新！', 'success');
+            notifyOtherTabs();
             fetchRoomData();
         }
 
-        // 開牌切換：即時更新本地狀態並響應 UI
         async function hostToggleReveal() {
             gameState.isRevealed = !gameState.isRevealed;
-            localStorage.setItem(`room_rev_${currentUser.roomCode}`, gameState.isRevealed ? 'true' : 'false');
+            SafeStorage.setItem(`room_rev_${currentUser.roomCode}`, gameState.isRevealed ? 'true' : 'false');
 
             updateHostRevealBtnUI();
             updateGameState(gameState);
@@ -411,6 +489,8 @@
             } catch (e) {}
 
             toggleHostModal(false);
+            showToast(gameState.isRevealed ? '全網頁已開牌！' : '卡牌已蓋上', 'info');
+            notifyOtherTabs();
         }
 
         function updateHostRevealBtnUI() {
@@ -427,10 +507,8 @@
         }
 
         async function hostResetRound() {
-            if (!confirm('確定要清空答案並開始下一輪嗎？')) return;
-            
-            localStorage.removeItem(`room_players_${currentUser.roomCode}`);
-            localStorage.setItem(`room_rev_${currentUser.roomCode}`, 'false');
+            SafeStorage.removeItem(`room_players_${currentUser.roomCode}`);
+            SafeStorage.setItem(`room_rev_${currentUser.roomCode}`, 'false');
             
             gameState.isRevealed = false;
             updateHostRevealBtnUI();
@@ -441,6 +519,8 @@
             } catch (e) {}
 
             toggleHostModal(false);
+            showToast('已重置為下一輪', 'info');
+            notifyOtherTabs();
             fetchRoomData();
         }
 
@@ -540,8 +620,8 @@
         }
 
         function syncLocalFallback() {
-            const q = localStorage.getItem(`room_q_${currentUser.roomCode}`) || '請說出一種常見的紅色的水果？';
-            const rev = localStorage.getItem(`room_rev_${currentUser.roomCode}`) === 'true';
+            const q = SafeStorage.getItem(`room_q_${currentUser.roomCode}`) || '請說出一種常見的紅色的水果？';
+            const rev = SafeStorage.getItem(`room_rev_${currentUser.roomCode}`) === 'true';
             let players = getLocalStorePlayers();
 
             if (players.length <= 1) {
@@ -567,14 +647,14 @@
 
         function getLocalStorePlayers() {
             try {
-                return JSON.parse(localStorage.getItem(`room_players_${currentUser.roomCode}`)) || [];
+                return JSON.parse(SafeStorage.getItem(`room_players_${currentUser.roomCode}`)) || [];
             } catch (e) {
                 return [];
             }
         }
 
         function saveLocalStorePlayers(players) {
-            localStorage.setItem(`room_players_${currentUser.roomCode}`, JSON.stringify(players));
+            SafeStorage.setItem(`room_players_${currentUser.roomCode}`, JSON.stringify(players));
         }
 
         function toggleHostModal(show) {
@@ -587,9 +667,13 @@
         }
 
         function copyRoomCode() {
-            navigator.clipboard.writeText(currentUser.roomCode).then(() => {
-                alert(`已複製房間號碼：${currentUser.roomCode}`);
-            });
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(currentUser.roomCode).then(() => {
+                    showToast(`已複製房間號碼：${currentUser.roomCode}`, 'success');
+                });
+            } else {
+                showToast(`房間號碼為：${currentUser.roomCode}`, 'info');
+            }
         }
 
         function escapeHtml(str) {
