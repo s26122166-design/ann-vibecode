@@ -108,7 +108,7 @@
           class="relative w-full h-full rounded-full border-4 border-white bg-cozy-accent object-cover shadow-md"
           onerror="this.src='https://placehold.co/120x120/d4a373/ffffff?text=AVATAR'"
         />
-        <span class="absolute bottom-0 right-0 bg-cozy-primary text-white text-[11px] font-bold px-2 py-0.5 rounded-full shadow-sm border-2 border-white">Lv.4 成長中</span>
+        <span id="level-badge" class="absolute bottom-0 right-0 bg-cozy-primary text-white text-[11px] font-bold px-2 py-0.5 rounded-full shadow-sm border-2 border-white">Lv.5 成長中</span>
       </div>
 
       <!-- Player Name -->
@@ -126,17 +126,17 @@
             <span class="w-2 h-2 rounded-full bg-cozy-primary animate-pulse"></span>
             狀態：靈感滿點中 ✨
           </span>
-          <span class="text-cozy-secondary">已完成：4 / 16 週</span>
+          <span id="completed-count" class="text-cozy-secondary">已完成：5 / 16 週</span>
         </div>
 
-        <!-- Progress Bar (4/16 = 25%) -->
+        <!-- Progress Bar (5/16 = 31.25%) -->
         <div class="w-full h-3.5 bg-cozy-border/60 rounded-full p-0.5 relative overflow-hidden">
-          <div class="h-full bg-gradient-to-r from-cozy-secondary to-cozy-primary rounded-full transition-all duration-1000" style="width: 25%;"></div>
+          <div id="progress-bar" class="h-full bg-gradient-to-r from-cozy-secondary to-cozy-primary rounded-full transition-all duration-1000" style="width: 31.25%;"></div>
         </div>
 
         <div class="flex justify-between text-[11px] text-cozy-muted font-medium">
-          <span>進度：25%</span>
-          <span>下一站：第 5 週 (準備解鎖)</span>
+          <span id="progress-text">進度：31.25%</span>
+          <span id="next-stop">下一站：第 6 週 (準備解鎖)</span>
         </div>
       </div>
     </section>
@@ -236,13 +236,13 @@
       } catch (e) {}
     }
 
-    // 16 週課程資料
+    // 16 週課程資料（已解鎖第 5 週）
     const levelsData = [
       { week: 1, title: "Week 1 - 數位名片", url: "w1/index.html", unlocked: true },
       { week: 2, title: "Week 2 - 今天吃甚麼?", url: "w2/index.html", unlocked: true },
       { week: 3, title: "Week 3 - 課堂作業 3", url: "w3/index.html", unlocked: true },
       { week: 4, title: "Week 4 - 課堂作業 4", url: "w4/index.html", unlocked: true },
-      { week: 5, title: "Week 5 - 課堂作業 5", url: "w5/index.html", unlocked: false },
+      { week: 5, title: "Week 5 - 課堂作業 5", url: "w5/index.html", unlocked: true },
       { week: 6, title: "Week 6 - 課堂作業 6", url: "w6/index.html", unlocked: false },
       { week: 7, title: "Week 7 - 課堂作業 7", url: "w7/index.html", unlocked: false },
       { week: 8, title: "Week 8 - 期中專案", url: "w8/index.html", unlocked: false },
@@ -255,6 +255,22 @@
       { week: 15, title: "Week 15 - 課堂作業 15", url: "w15/index.html", unlocked: false },
       { week: 16, title: "Week 16 - 期末專案", url: "w16/index.html", unlocked: false },
     ];
+
+    // 自動計算並更新進度狀態
+    function updateProgress() {
+      const total = levelsData.length;
+      const unlockedCount = levelsData.filter(item => item.unlocked).length;
+      const percentage = Number(((unlockedCount / total) * 100).toFixed(2));
+      const nextLocked = levelsData.find(item => !item.unlocked);
+
+      document.getElementById('level-badge').innerText = unlockedCount === total ? `Lv.${unlockedCount} 已通關 🎉` : `Lv.${unlockedCount} 成長中`;
+      document.getElementById('completed-count').innerText = `已完成：${unlockedCount} / ${total} 週`;
+      document.getElementById('progress-bar').style.width = `${percentage}%`;
+      document.getElementById('progress-text').innerText = `進度：${percentage}%`;
+      document.getElementById('next-stop').innerText = nextLocked 
+        ? `下一站：第 ${nextLocked.week} 週 (準備解鎖)` 
+        : `全數解鎖完成！`;
+    }
 
     // 顯示提示訊息
     function showToast(msg) {
@@ -374,6 +390,7 @@
 
     // 初始化頁面
     window.addEventListener('DOMContentLoaded', () => {
+      updateProgress();
       renderGrid();
     });
   </script>
