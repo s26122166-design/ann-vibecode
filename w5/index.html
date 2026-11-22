@@ -3,16 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>雲端心電感應 💗 Telepathy Game</title>
+  <title>雲端心電感應 ☕ Telepathy Game</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google Fonts 可愛圓體 -->
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+  <!-- Google Fonts 休閒輕鬆圓體 (支援繁體中文與英文) -->
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
   
   <style>
     body {
-      font-family: 'Fredoka', cursive, sans-serif;
-      background-color: #fdf2f8;
+      font-family: 'Quicksand', 'Zen Maru Gothic', sans-serif;
+      background-color: #FAF7F2;
+      letter-spacing: 0.02em;
     }
     
     /* 3D 卡片翻轉動畫 */
@@ -30,44 +31,44 @@
       transform: rotateY(180deg);
     }
     .card-inner {
-      transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
     }
     .card-flipped .card-inner {
       transform: rotateY(180deg);
     }
 
-    /* 可愛氣泡背景動畫 */
-    @keyframes float {
+    /* 悠閒微風漂浮動畫 */
+    @keyframes floatSlow {
       0%, 100% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(-15px) rotate(3deg); }
+      50% { transform: translateY(-10px) rotate(1.5deg); }
     }
-    .animate-float {
-      animation: float 4s ease-in-out infinite;
+    .animate-float-slow {
+      animation: floatSlow 6s ease-in-out infinite;
     }
     
-    /* 粉色可愛泡泡圓角與陰影 */
-    .bubble-card {
-      border-radius: 2rem;
-      box-shadow: 0 10px 25px -5px rgba(244, 114, 182, 0.3), 0 8px 10px -6px rgba(244, 114, 182, 0.2);
+    /* 休閒質感卡片圓角與柔和陰影 */
+    .chill-card {
+      border-radius: 1.75rem;
+      box-shadow: 0 12px 30px -8px rgba(87, 83, 78, 0.1), 0 4px 12px -4px rgba(107, 144, 128, 0.08);
     }
   </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-pink-100 via-pink-200 to-rose-200 text-pink-900 flex flex-col justify-between relative overflow-x-hidden">
+<body class="min-h-screen bg-gradient-to-br from-[#FAF7F2] via-[#F2EFE9] to-[#E4EDE8] text-stone-700 flex flex-col justify-between relative overflow-x-hidden">
 
-  <!-- 背景氛圍裝飾泡泡 -->
-  <div class="fixed top-8 left-8 w-24 h-24 bg-white/40 rounded-full blur-xl pointer-events-none animate-float"></div>
-  <div class="fixed bottom-12 right-12 w-36 h-36 bg-pink-300/40 rounded-full blur-2xl pointer-events-none animate-float" style="animation-delay: 1.5s;"></div>
+  <!-- 背景氛圍裝飾光暈 (燕麥奶與鼠尾草綠) -->
+  <div class="fixed top-10 left-10 w-40 h-40 bg-emerald-200/30 rounded-full blur-2xl pointer-events-none animate-float-slow"></div>
+  <div class="fixed bottom-14 right-12 w-52 h-52 bg-amber-200/30 rounded-full blur-3xl pointer-events-none animate-float-slow" style="animation-delay: 2.5s;"></div>
 
   <!-- 頂部導覽列 -->
   <header class="p-4 md:p-6 flex justify-between items-center z-10 max-w-5xl mx-auto w-full">
-    <div class="flex items-center space-x-2">
-      <span class="text-3xl">🔮</span>
-      <h1 class="text-2xl md:text-3xl font-extrabold text-pink-600 tracking-wide drop-shadow-sm">雲端心電感應</h1>
+    <div class="flex items-center space-x-2.5">
+      <span class="text-3xl">☕</span>
+      <h1 class="text-2xl md:text-3xl font-bold text-teal-800 tracking-wide">雲端心電感應</h1>
     </div>
     
-    <div id="roomBadge" class="hidden bg-white/80 backdrop-blur border-2 border-pink-300 px-4 py-2 rounded-full font-bold text-pink-500 shadow-sm flex items-center gap-2">
-      <span>房號：<span id="displayRoomId" class="text-pink-700">--</span></span>
-      <span id="hostBadge" class="hidden bg-pink-500 text-white text-xs px-2 py-0.5 rounded-full">房主</span>
+    <div id="roomBadge" class="hidden bg-white/85 backdrop-blur border border-stone-200 px-4 py-2 rounded-full font-bold text-stone-600 shadow-sm flex items-center gap-2">
+      <span>房號：<span id="displayRoomId" class="text-teal-700">--</span></span>
+      <span id="hostBadge" class="hidden bg-teal-600 text-white text-xs px-2.5 py-0.5 rounded-full">房主</span>
     </div>
   </header>
 
@@ -75,27 +76,27 @@
   <main class="container mx-auto px-4 py-6 max-w-4xl flex-grow flex flex-col justify-center items-center z-10">
 
     <!-- 頁面 1: 登入 / 選擇與建立房間 -->
-    <div id="viewLogin" class="w-full max-w-md bg-white/90 backdrop-blur bubble-card p-8 text-center border-4 border-pink-200 animate-float">
-      <div class="text-5xl mb-4">🎈</div>
-      <h2 class="text-2xl font-bold text-pink-600 mb-6">加入遊戲房間</h2>
+    <div id="viewLogin" class="w-full max-w-md bg-white/85 backdrop-blur-md chill-card p-8 text-center border border-stone-200/80 animate-float-slow">
+      <div class="text-5xl mb-3">🌤️</div>
+      <h2 class="text-2xl font-bold text-stone-700 mb-6">輕鬆加入遊戲房間</h2>
       
       <div class="space-y-4 text-left">
         <div>
-          <label class="block text-sm font-bold text-pink-400 mb-1 ml-2">玩家暱稱</label>
-          <input type="text" id="inputPlayerName" placeholder="請輸入暱稱..." class="w-full px-5 py-3 rounded-2xl border-2 border-pink-200 focus:border-pink-400 focus:outline-none text-pink-700 bg-pink-50/50 font-semibold transition">
+          <label class="block text-sm font-bold text-stone-500 mb-1.5 ml-2">玩家暱稱</label>
+          <input type="text" id="inputPlayerName" placeholder="輸入你的暱稱..." class="w-full px-5 py-3 rounded-2xl border border-stone-200 focus:border-teal-500 focus:outline-none text-stone-700 bg-[#FAF7F2]/80 font-medium transition">
         </div>
         
         <div>
-          <label class="block text-sm font-bold text-pink-400 mb-1 ml-2">房間號碼 (自由分組)</label>
+          <label class="block text-sm font-bold text-stone-500 mb-1.5 ml-2">房間號碼 (自由分組)</label>
           <div class="flex gap-2">
-            <input type="text" id="inputRoomId" placeholder="例如: 888" class="w-full px-5 py-3 rounded-2xl border-2 border-pink-200 focus:border-pink-400 focus:outline-none text-pink-700 bg-pink-50/50 font-semibold transition">
-            <button onclick="generateRandomRoom()" class="px-4 py-3 bg-pink-100 hover:bg-pink-200 text-pink-600 font-bold rounded-2xl transition whitespace-nowrap">隨機號碼</button>
+            <input type="text" id="inputRoomId" placeholder="例如: 888" class="w-full px-5 py-3 rounded-2xl border border-stone-200 focus:border-teal-500 focus:outline-none text-stone-700 bg-[#FAF7F2]/80 font-medium transition">
+            <button onclick="generateRandomRoom()" class="px-4 py-3 bg-stone-100 hover:bg-stone-200 text-stone-600 font-bold rounded-2xl transition whitespace-nowrap">隨機房號</button>
           </div>
         </div>
       </div>
 
-      <button onclick="joinRoom()" class="mt-8 w-full py-4 bg-gradient-to-r from-pink-400 to-rose-400 hover:from-pink-500 hover:to-rose-500 text-white font-extrabold text-lg rounded-2xl shadow-lg transform active:scale-95 transition">
-        進入房間 💕
+      <button onclick="joinRoom()" class="mt-8 w-full py-4 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-bold text-lg rounded-2xl shadow-md transform active:scale-95 transition">
+        進入房間 🌿
       </button>
     </div>
 
@@ -103,29 +104,29 @@
     <div id="viewGame" class="hidden w-full flex flex-col items-center gap-6">
 
       <!-- 題目顯示區 -->
-      <div class="w-full bg-white/90 backdrop-blur bubble-card p-6 border-4 border-pink-200 text-center shadow-lg relative">
-        <span class="text-xs font-extrabold text-pink-400 uppercase tracking-widest bg-pink-100 px-3 py-1 rounded-full">Current Question</span>
-        <h2 id="questionTitle" class="text-2xl md:text-3xl font-extrabold text-pink-600 mt-3 min-h-[40px] flex items-center justify-center">
+      <div class="w-full bg-white/85 backdrop-blur-md chill-card p-6 border border-stone-200/80 text-center relative">
+        <span class="text-xs font-bold text-teal-700 uppercase tracking-widest bg-teal-50 border border-teal-200/70 px-3.5 py-1 rounded-full">Current Topic</span>
+        <h2 id="questionTitle" class="text-2xl md:text-3xl font-bold text-stone-700 mt-3 min-h-[40px] flex items-center justify-center">
           等待房主出題中...
         </h2>
       </div>
 
       <!-- 玩家填答輸入區 (當狀態為 playing 時開放) -->
-      <div id="answerSection" class="w-full max-w-md bg-white/90 backdrop-blur bubble-card p-6 border-4 border-pink-200 text-center hidden">
-        <h3 class="text-lg font-bold text-pink-500 mb-3">請寫下你的心電感應答案 ✨</h3>
+      <div id="answerSection" class="w-full max-w-md bg-white/85 backdrop-blur-md chill-card p-6 border border-stone-200/80 text-center hidden">
+        <h3 class="text-lg font-bold text-stone-600 mb-3">寫下你的直覺答案 💭</h3>
         <div class="flex gap-2">
-          <input type="text" id="inputAnswer" placeholder="輸入答案..." class="w-full px-5 py-3 rounded-2xl border-2 border-pink-200 focus:border-pink-400 focus:outline-none text-pink-700 bg-pink-50/50 font-semibold">
-          <button onclick="submitAnswer()" class="px-6 py-3 bg-pink-500 hover:bg-pink-600 text-white font-bold rounded-2xl transition shadow-md whitespace-nowrap active:scale-95">
+          <input type="text" id="inputAnswer" placeholder="輸入答案..." class="w-full px-5 py-3 rounded-2xl border border-stone-200 focus:border-teal-500 focus:outline-none text-stone-700 bg-[#FAF7F2]/80 font-medium">
+          <button onclick="submitAnswer()" class="px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-2xl transition shadow-sm whitespace-nowrap active:scale-95">
             送出
           </button>
         </div>
-        <p id="submitStatus" class="text-xs font-bold text-pink-400 mt-2 h-4"></p>
+        <p id="submitStatus" class="text-xs font-bold text-teal-600 mt-2 h-4"></p>
       </div>
 
       <!-- 玩家卡片展出區 (全網頁同步 3D 翻牌) -->
       <div class="w-full">
-        <h3 class="text-xl font-extrabold text-pink-600 mb-4 text-center flex items-center justify-center gap-2">
-          <span>🍓</span> 玩家心電卡片 <span>🍓</span>
+        <h3 class="text-lg font-bold text-stone-600 mb-4 text-center flex items-center justify-center gap-2">
+          <span>🌿</span> 玩家心電卡片 <span>🌿</span>
         </h3>
         <div id="cardsGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
           <!-- 卡片動態渲染於此 -->
@@ -137,42 +138,42 @@
   </main>
 
   <!-- 頁尾與隱藏控制台按鈕 -->
-  <footer class="p-4 text-center text-pink-400 text-sm font-semibold flex justify-between items-center max-w-4xl mx-auto w-full">
-    <span>💖 Cloud Telepathy Game</span>
-    <!-- 隱藏房主控制台按鈕 (點擊右下角星星) -->
-    <button onclick="toggleHostConsole()" class="opacity-30 hover:opacity-100 transition-opacity text-xl p-2" title="開啟房主控制台">
-      ⭐
+  <footer class="p-4 text-center text-stone-400 text-sm font-medium flex justify-between items-center max-w-4xl mx-auto w-full">
+    <span>🌿 Cloud Telepathy Game</span>
+    <!-- 隱藏房主控制台按鈕 (點擊右下角盆栽) -->
+    <button onclick="toggleHostConsole()" class="opacity-40 hover:opacity-100 transition-opacity text-xl p-2" title="開啟房主控制台">
+      🪴
     </button>
   </footer>
 
   <!-- 隱藏房主控制台 Modal -->
-  <div id="hostModal" class="hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="bg-white bubble-card border-4 border-pink-300 p-6 w-full max-w-lg shadow-2xl relative">
-      <button onclick="toggleHostConsole()" class="absolute top-4 right-4 text-pink-400 hover:text-pink-600 font-bold text-xl">✕</button>
+  <div id="hostModal" class="hidden fixed inset-0 bg-stone-900/35 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-[#FAF7F2] chill-card border border-stone-200 p-6 w-full max-w-lg shadow-xl relative">
+      <button onclick="toggleHostConsole()" class="absolute top-4 right-4 text-stone-400 hover:text-stone-600 font-bold text-xl">✕</button>
       
       <div class="flex items-center gap-2 mb-4">
-        <span class="text-2xl">👑</span>
-        <h3 class="text-xl font-extrabold text-pink-600">房主管理控制台</h3>
+        <span class="text-2xl">🎧</span>
+        <h3 class="text-xl font-bold text-stone-700">房主休閒控制台</h3>
       </div>
 
       <div class="space-y-4">
         <div>
-          <label class="block text-sm font-bold text-pink-400 mb-1">設定新題目</label>
+          <label class="block text-sm font-bold text-stone-500 mb-1.5">設定新題目</label>
           <div class="flex gap-2">
-            <input type="text" id="hostQuestionInput" placeholder="例如：說到夏天會想到什麼水果？" class="w-full px-4 py-2 rounded-xl border-2 border-pink-200 focus:outline-none text-pink-700">
-            <button onclick="hostSetQuestion()" class="px-4 py-2 bg-pink-500 hover:bg-pink-600 text-white font-bold rounded-xl transition whitespace-nowrap">
+            <input type="text" id="hostQuestionInput" placeholder="例如：你喜歡喝什麼？" class="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-white focus:border-teal-500 focus:outline-none text-stone-700">
+            <button onclick="hostSetQuestion()" class="px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl transition whitespace-nowrap">
               發布題目
             </button>
           </div>
         </div>
 
-        <hr class="border-pink-100">
+        <hr class="border-stone-200">
 
         <div class="flex gap-3">
-          <button onclick="hostReveal()" class="flex-1 py-3 bg-gradient-to-r from-purple-400 to-pink-500 hover:from-purple-500 hover:to-pink-600 text-white font-extrabold rounded-xl shadow transition transform active:scale-95 flex items-center justify-center gap-2">
-            <span>🃏</span> 全網頁同步開牌！
+          <button onclick="hostReveal()" class="flex-1 py-3 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-bold rounded-xl shadow-sm transition transform active:scale-95 flex items-center justify-center gap-2">
+            <span>✨</span> 全網頁同步翻牌！
           </button>
-          <button onclick="hostReset()" class="px-4 py-3 bg-gray-200 hover:bg-gray-300 text-gray-600 font-bold rounded-xl transition">
+          <button onclick="hostReset()" class="px-4 py-3 bg-stone-200 hover:bg-stone-300 text-stone-600 font-bold rounded-xl transition">
             重置房間
           </button>
         </div>
@@ -183,7 +184,7 @@
   <script>
     // === 核心變數設定 ===
     const SHEET_NAME = 'TelepathyData';
-    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbzTNw47bbTVHuIJN7b6gnsB1Mhz9t3O2wvgVjVEZdZt9gaW8MXE72gb401TpvKgqReU_w/exec";
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyf0rHPnWr18cFk-n-aWFGI9cTJ5cuQQNygBDBeCJ5BjX8n1cmK_fU_ycEvAms5xShEeA/exec";
 
     let gameState = {
       roomId: "default",
@@ -270,7 +271,7 @@
       const playerNames = Object.keys(gameState.answers);
 
       if (playerNames.length === 0) {
-        grid.innerHTML = `<p class="col-span-full text-center text-pink-400 py-8 font-bold">還沒有玩家送出答案喔～</p>`;
+        grid.innerHTML = `<p class="col-span-full text-center text-stone-400 py-8 font-medium">還沒有玩家送出答案喔，慢慢想～ ☕</p>`;
         return;
       }
 
@@ -285,20 +286,20 @@
           <div class="perspective-1000 w-full h-40">
             <div class="card-inner relative w-full h-full transform-style-3d ${flippedClass}">
               
-              <!-- 卡片背面 (隱藏答案) -->
-              <div class="absolute inset-0 w-full h-full bg-gradient-to-br from-pink-300 to-rose-400 rounded-2xl p-4 flex flex-col justify-between items-center text-white backface-hidden border-2 border-white shadow-md">
-                <span class="text-xs font-extrabold bg-white/20 px-3 py-1 rounded-full">${escapeHtml(name)}</span>
-                <div class="text-3xl animate-bounce">❓</div>
-                <span class="text-xs font-semibold opacity-80">已填答</span>
+              <!-- 卡片背面 (隱藏答案 - 鼠尾草綠休閒風) -->
+              <div class="absolute inset-0 w-full h-full bg-gradient-to-br from-[#7FA695] to-[#5E8675] rounded-2xl p-4 flex flex-col justify-between items-center text-white backface-hidden border border-white/60 shadow-sm">
+                <span class="text-xs font-bold bg-white/20 px-3 py-1 rounded-full">${escapeHtml(name)}</span>
+                <div class="text-3xl">🎲</div>
+                <span class="text-xs font-medium opacity-90">已填答</span>
               </div>
 
-              <!-- 卡片正面 (同步翻牌顯現) -->
-              <div class="absolute inset-0 w-full h-full bg-white rounded-2xl p-4 flex flex-col justify-between items-center text-pink-600 backface-hidden rotate-y-180 border-4 border-pink-300 shadow-md">
-                <span class="text-xs font-extrabold bg-pink-100 px-3 py-1 rounded-full text-pink-500">${escapeHtml(name)}</span>
-                <div class="text-xl font-extrabold text-pink-700 text-center break-all my-auto">
+              <!-- 卡片正面 (同步翻牌顯現 - 暖白茶韻風) -->
+              <div class="absolute inset-0 w-full h-full bg-white rounded-2xl p-4 flex flex-col justify-between items-center text-stone-700 backface-hidden rotate-y-180 border-2 border-teal-200 shadow-sm">
+                <span class="text-xs font-bold bg-teal-50 px-3 py-1 rounded-full text-teal-700">${escapeHtml(name)}</span>
+                <div class="text-xl font-bold text-stone-700 text-center break-all my-auto">
                   ${escapeHtml(answer)}
                 </div>
-                <span class="text-xs font-bold text-pink-300">雲端心電 💓</span>
+                <span class="text-xs font-medium text-stone-400">心有靈犀 ✨</span>
               </div>
 
             </div>
@@ -331,7 +332,7 @@
           })
         });
 
-        statusText.innerText = "答案已送出！等待房主開牌...";
+        statusText.innerText = "答案已送出！稍待房主翻牌 ☕";
         document.getElementById('inputAnswer').value = "";
         fetchGameState(); // 提交後手動刷新
       } catch (error) {
