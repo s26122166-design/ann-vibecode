@@ -16,7 +16,7 @@
       letter-spacing: 0.02em;
     }
     
-    /* 3D 卡片翻轉動畫 */
+    /* 3D 卡片翻轉動畫 (已修正父子層級選擇器) */
     .perspective-1000 {
       perspective: 1000px;
     }
@@ -31,9 +31,10 @@
       transform: rotateY(180deg);
     }
     .card-inner {
-      transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+      transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
     }
-    .card-flipped .card-inner {
+    .card-flipped .card-inner,
+    .card-inner.card-flipped {
       transform: rotateY(180deg);
     }
 
@@ -95,7 +96,7 @@
         <div>
           <label class="block text-sm font-bold text-stone-500 mb-1.5 ml-2">房間號碼 (自由分組)</label>
           <div class="flex gap-2">
-            <input type="text" id="inputRoomId" placeholder="例如: 888" class="w-full px-5 py-3 rounded-2xl border border-stone-200 focus:border-teal-500 focus:outline-none text-stone-700 bg-[#FAF7F2]/80 font-medium transition">
+            <input type="text" id="inputRoomId" onkeydown="if(event.key==='Enter') joinRoom()" placeholder="例如: 888" class="w-full px-5 py-3 rounded-2xl border border-stone-200 focus:border-teal-500 focus:outline-none text-stone-700 bg-[#FAF7F2]/80 font-medium transition">
             <button onclick="generateRandomRoom()" class="px-4 py-3 bg-stone-100 hover:bg-stone-200 text-stone-600 font-bold rounded-2xl transition whitespace-nowrap">隨機房號</button>
           </div>
         </div>
@@ -121,7 +122,7 @@
       <div id="answerSection" class="w-full max-w-md bg-white/85 backdrop-blur-md chill-card p-6 border border-stone-200/80 text-center hidden">
         <h3 class="text-lg font-bold text-stone-600 mb-3">寫下你的直覺答案 💭</h3>
         <div class="flex gap-2">
-          <input type="text" id="inputAnswer" placeholder="輸入答案..." class="w-full px-5 py-3 rounded-2xl border border-stone-200 focus:border-teal-500 focus:outline-none text-stone-700 bg-[#FAF7F2]/80 font-medium">
+          <input type="text" id="inputAnswer" onkeydown="if(event.key==='Enter') submitAnswer()" placeholder="輸入答案..." class="w-full px-5 py-3 rounded-2xl border border-stone-200 focus:border-teal-500 focus:outline-none text-stone-700 bg-[#FAF7F2]/80 font-medium">
           <button onclick="submitAnswer()" class="px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-2xl transition shadow-sm whitespace-nowrap active:scale-95">
             送出
           </button>
@@ -129,21 +130,27 @@
         <p id="submitStatus" class="text-xs font-bold text-teal-600 mt-2 h-4"></p>
       </div>
 
-      <!-- 玩家卡片展出區 (支援點擊單張翻面 + 一鍵解鎖看全部答案) -->
+      <!-- 玩家卡片展出區 (支援點擊單張翻面 + 一鍵解鎖看全部答案 + 同步開牌) -->
       <div class="w-full">
         <div class="flex flex-col sm:flex-row items-center justify-between gap-3 mb-4 px-1">
           <div class="flex items-center gap-2">
             <h3 class="text-lg font-bold text-stone-600 flex items-center gap-2">
               <span>🌿</span> 玩家心電卡片 <span>🌿</span>
             </h3>
-            <span class="text-xs text-stone-400 font-medium">(點擊卡片可單獨翻看)</span>
+            <span class="text-xs text-stone-400 font-medium">(點擊卡片可單獨翻面)</span>
           </div>
 
-          <!-- 解鎖看答案切換按鈕 -->
-          <button id="btnUnlockPeek" onclick="togglePeekAll()" class="px-4 py-2 rounded-full text-sm font-bold bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-200 shadow-sm transition active:scale-95 flex items-center gap-1.5">
-            <span>👁️</span>
-            <span>解鎖看答案</span>
-          </button>
+          <!-- 看答案控制按鈕群組 -->
+          <div class="flex items-center gap-2">
+            <button id="btnUnlockPeek" onclick="togglePeekAll()" class="px-4 py-2 rounded-full text-sm font-bold bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-200 shadow-sm transition active:scale-95 flex items-center gap-1.5">
+              <span>👁️</span>
+              <span>偷看答案</span>
+            </button>
+            <button onclick="hostRevealDirect()" class="px-4 py-2 rounded-full text-sm font-bold bg-teal-600 hover:bg-teal-700 text-white shadow-sm transition active:scale-95 flex items-center gap-1.5">
+              <span>✨</span>
+              <span>全場同步開牌</span>
+            </button>
+          </div>
         </div>
 
         <div id="cardsGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
@@ -178,7 +185,7 @@
         <div>
           <label class="block text-sm font-bold text-stone-500 mb-1.5">設定新題目</label>
           <div class="flex gap-2">
-            <input type="text" id="hostQuestionInput" placeholder="例如：你喜歡喝什麼？" class="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-white focus:border-teal-500 focus:outline-none text-stone-700">
+            <input type="text" id="hostQuestionInput" onkeydown="if(event.key==='Enter') hostSetQuestion()" placeholder="例如：你喜歡喝什麼？" class="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-white focus:border-teal-500 focus:outline-none text-stone-700">
             <button onclick="hostSetQuestion()" class="px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl transition whitespace-nowrap">
               發布題目
             </button>
@@ -211,7 +218,7 @@
       status: "setup", // setup, playing, revealed
       question: "",
       answers: {},
-      localPeekAll: false,      // 本地一鍵解鎖全部答案
+      localPeekAll: false,      // 本地一鍵偷看全部答案
       localPeekedCards: {}      // 記錄單張點擊翻開的玩家卡片
     };
 
@@ -295,7 +302,7 @@
       renderCards();
     }
 
-    // 切換「一鍵解鎖看全部答案」
+    // 切換「一鍵偷看全部答案」
     function togglePeekAll() {
       if (gameState.status === 'revealed') return;
       gameState.localPeekAll = !gameState.localPeekAll;
@@ -322,19 +329,19 @@
       renderCards();
     }
 
-    // 更新「解鎖看答案」按鈕視覺
+    // 更新「偷看答案」按鈕視覺
     function updatePeekButtonUI() {
       const btn = document.getElementById('btnUnlockPeek');
       if (!btn) return;
 
       if (gameState.status === 'revealed') {
-        btn.innerHTML = `<span>🔓</span><span>全場已同步開牌</span>`;
+        btn.innerHTML = `<span>🔓</span><span>已全場開牌</span>`;
         btn.className = "px-4 py-2 rounded-full text-sm font-bold bg-teal-100 text-teal-800 border border-teal-200 cursor-default flex items-center gap-1.5";
       } else if (gameState.localPeekAll) {
         btn.innerHTML = `<span>🙈</span><span>蓋上答案</span>`;
-        btn.className = "px-4 py-2 rounded-full text-sm font-bold bg-teal-600 hover:bg-teal-700 text-white border border-teal-600 shadow-sm transition active:scale-95 flex items-center gap-1.5";
+        btn.className = "px-4 py-2 rounded-full text-sm font-bold bg-amber-500 hover:bg-amber-600 text-white border border-amber-500 shadow-sm transition active:scale-95 flex items-center gap-1.5";
       } else {
-        btn.innerHTML = `<span>👁️</span><span>解鎖看答案</span>`;
+        btn.innerHTML = `<span>👁️</span><span>偷看答案</span>`;
         btn.className = "px-4 py-2 rounded-full text-sm font-bold bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-200 shadow-sm transition active:scale-95 flex items-center gap-1.5";
       }
     }
@@ -349,30 +356,36 @@
         return;
       }
 
-      // 判斷是否觸發開牌（全場開牌 OR 個人解鎖全部 OR 個人點擊單張）
+      // 判斷是否觸發開牌（全場開牌 OR 個人偷看全部 OR 個人點擊單張）
       const isGlobalRevealed = gameState.status === 'revealed';
 
       grid.innerHTML = playerNames.map(name => {
-        const answer = gameState.answers[name];
+        const rawAnswer = gameState.answers[name];
         const isFlipped = isGlobalRevealed || gameState.localPeekAll || !!gameState.localPeekedCards[name];
         const flippedClass = isFlipped ? 'card-flipped' : '';
 
+        // 若後端在未開牌前有加密回傳 (如 true 或 ***)，給予清楚提示
+        const isMaskedByBackend = (rawAnswer === true || rawAnswer === '***' || rawAnswer === '[隱藏]');
+        const displayAnswer = isMaskedByBackend
+          ? `<span class="text-xs text-amber-700 font-medium">後端加密中<br>請按「全場同步開牌」</span>`
+          : escapeHtml(rawAnswer);
+
         return `
-          <div data-player="${escapeHtml(name)}" onclick="toggleCardPeek(this.dataset.player)" class="perspective-1000 w-full h-40 cursor-pointer select-none" title="點擊翻開 / 蓋上卡片">
-            <div class="card-inner relative w-full h-full transform-style-3d ${flippedClass}">
+          <div data-player="${escapeHtml(name)}" onclick="toggleCardPeek(this.dataset.player)" class="perspective-1000 w-full h-40 cursor-pointer select-none ${flippedClass}" title="點擊翻開 / 蓋上卡片">
+            <div class="card-inner relative w-full h-full transform-style-3d">
               
               <!-- 卡片背面 (隱藏答案 - 鼠尾草綠休閒風) -->
               <div class="absolute inset-0 w-full h-full bg-gradient-to-br from-[#7FA695] to-[#5E8675] rounded-2xl p-4 flex flex-col justify-between items-center text-white backface-hidden border border-white/60 shadow-sm hover:brightness-105 transition">
                 <span class="text-xs font-bold bg-white/20 px-3 py-1 rounded-full">${escapeHtml(name)}</span>
                 <div class="text-3xl">🎲</div>
-                <span class="text-xs font-medium opacity-90">點擊偷看 👁️</span>
+                <span class="text-xs font-medium opacity-90">點擊翻開 👁️</span>
               </div>
 
               <!-- 卡片正面 (翻牌顯現 - 暖白茶韻風) -->
               <div class="absolute inset-0 w-full h-full bg-white rounded-2xl p-4 flex flex-col justify-between items-center text-stone-700 backface-hidden rotate-y-180 border-2 border-teal-200 shadow-sm">
                 <span class="text-xs font-bold bg-teal-50 px-3 py-1 rounded-full text-teal-700">${escapeHtml(name)}</span>
                 <div class="text-xl font-bold text-stone-700 text-center break-all my-auto">
-                  ${escapeHtml(answer)}
+                  ${displayAnswer}
                 </div>
                 <span class="text-xs font-medium text-stone-400">心有靈犀 ✨</span>
               </div>
@@ -407,7 +420,7 @@
           })
         });
 
-        statusText.innerText = "答案已送出！稍待房主翻牌 ☕";
+        statusText.innerText = "答案已送出！稍待翻牌 ☕";
         document.getElementById('inputAnswer').value = "";
         fetchGameState(); // 提交後手動刷新
       } catch (error) {
@@ -441,10 +454,15 @@
       toggleHostConsole();
     }
 
-    // 同步開牌
+    // 同步開牌 (從控制台觸發)
     async function hostReveal() {
       await sendHostAction({ action: "reveal" });
       toggleHostConsole();
+    }
+
+    // 同步開牌 (從主畫面按鈕直接觸發)
+    async function hostRevealDirect() {
+      await sendHostAction({ action: "reveal" });
     }
 
     // 重置房間狀態
