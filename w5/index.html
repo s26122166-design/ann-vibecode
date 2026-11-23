@@ -117,31 +117,14 @@
         </h2>
       </div>
 
-      <!-- 玩家多欄位填答輸入區 + 翻牌看答案按鈕 -->
+      <!-- 玩家單一填答輸入區 + 翻牌看答案按鈕 -->
       <div id="answerSection" class="w-full max-w-lg bg-white/85 backdrop-blur-md chill-card p-6 border border-stone-200/80 text-center">
-        <div class="flex items-center justify-between mb-3 px-1">
-          <h3 class="text-lg font-bold text-stone-600">寫下你的答案 💭</h3>
-          <button type="button" onclick="addAnswerField()" class="text-xs font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 border border-teal-200/80 px-3 py-1.5 rounded-full transition active:scale-95">
-            + 新增答案欄位
-          </button>
-        </div>
+        <h3 class="text-lg font-bold text-stone-600 mb-3">寫下你的答案 💭</h3>
         
-        <!-- 多個答案輸入框容器 -->
-        <div id="answerInputsList" class="space-y-2.5 text-left">
-          <div class="answer-input-row flex items-center gap-2">
-            <span class="text-xs font-bold text-teal-700 bg-teal-50 border border-teal-200/70 px-2.5 py-2 rounded-xl whitespace-nowrap">答案 1</span>
-            <input type="text" onkeydown="if(event.key==='Enter') submitAnswer()" placeholder="輸入第 1 個答案..." class="answer-input w-full px-4 py-2.5 rounded-2xl border border-stone-200 focus:border-teal-500 focus:outline-none text-stone-700 bg-[#FAF7F2]/80 font-medium transition">
-          </div>
-
-          <div class="answer-input-row flex items-center gap-2">
-            <span class="text-xs font-bold text-teal-700 bg-teal-50 border border-teal-200/70 px-2.5 py-2 rounded-xl whitespace-nowrap">答案 2</span>
-            <input type="text" onkeydown="if(event.key==='Enter') submitAnswer()" placeholder="輸入第 2 個答案..." class="answer-input w-full px-4 py-2.5 rounded-2xl border border-stone-200 focus:border-teal-500 focus:outline-none text-stone-700 bg-[#FAF7F2]/80 font-medium transition">
-            <button type="button" onclick="removeAnswerField(this)" class="px-2.5 py-2 text-stone-400 hover:text-rose-500 font-bold rounded-xl transition" title="刪除此欄位">✕</button>
-          </div>
-        </div>
+        <input type="text" id="inputAnswer" onkeydown="if(event.key==='Enter') submitAnswer()" placeholder="輸入你的答案..." class="w-full px-5 py-3 rounded-2xl border border-stone-200 focus:border-teal-500 focus:outline-none text-stone-700 bg-[#FAF7F2]/80 font-medium transition">
 
         <!-- 送出答案與翻牌看答案按鈕區 -->
-        <div class="mt-4 pt-4 border-t border-stone-200/80 flex flex-col sm:flex-row items-center justify-center gap-3">
+        <div class="mt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
           <button onclick="submitAnswer()" class="w-full sm:flex-1 py-3 px-6 bg-teal-600 hover:bg-teal-700 text-white font-bold text-base rounded-2xl transition shadow-sm whitespace-nowrap active:scale-95">
             送出答案 ✨
           </button>
@@ -240,35 +223,6 @@
     function generateRandomRoom() {
       const roomNum = Math.floor(1000 + Math.random() * 9000).toString();
       document.getElementById('inputRoomId').value = roomNum;
-    }
-
-    // 新增答案輸入欄位
-    function addAnswerField() {
-      const container = document.getElementById('answerInputsList');
-      const count = container.querySelectorAll('.answer-input-row').length + 1;
-      const row = document.createElement('div');
-      row.className = 'answer-input-row flex items-center gap-2';
-      row.innerHTML = `
-        <span class="text-xs font-bold text-teal-700 bg-teal-50 border border-teal-200/70 px-2.5 py-2 rounded-xl whitespace-nowrap">答案 ${count}</span>
-        <input type="text" onkeydown="if(event.key==='Enter') submitAnswer()" placeholder="輸入第 ${count} 個答案..." class="answer-input w-full px-4 py-2.5 rounded-2xl border border-stone-200 focus:border-teal-500 focus:outline-none text-stone-700 bg-[#FAF7F2]/80 font-medium transition">
-        <button type="button" onclick="removeAnswerField(this)" class="px-2.5 py-2 text-stone-400 hover:text-rose-500 font-bold rounded-xl transition" title="刪除此欄位">✕</button>
-      `;
-      container.appendChild(row);
-      row.querySelector('input').focus();
-    }
-
-    // 刪除多餘的答案輸入欄位
-    function removeAnswerField(btn) {
-      const container = document.getElementById('answerInputsList');
-      const rows = container.querySelectorAll('.answer-input-row');
-      if (rows.length <= 1) return;
-      btn.closest('.answer-input-row').remove();
-
-      container.querySelectorAll('.answer-input-row').forEach((row, idx) => {
-        const num = idx + 1;
-        row.querySelector('span').innerText = `答案 ${num}`;
-        row.querySelector('input').placeholder = `輸入第 ${num} 個答案...`;
-      });
     }
 
     // 登入進入指定房間
@@ -394,11 +348,9 @@
         const rawAnswer = gameState.answers[name];
         const flipped = isCardFlipped(name);
         const flippedClass = flipped ? 'card-flipped' : '';
-        const isMultiLine = String(rawAnswer).includes('\n');
-        const textSizeClass = isMultiLine ? 'text-base leading-snug' : 'text-xl';
 
         return `
-          <div data-player="${escapeHtml(name)}" onclick="toggleSingleCard(this.dataset.player)" class="perspective-1000 w-full h-44 cursor-pointer select-none ${flippedClass}" title="點擊翻開 / 蓋上卡片">
+          <div data-player="${escapeHtml(name)}" onclick="toggleSingleCard(this.dataset.player)" class="perspective-1000 w-full h-40 cursor-pointer select-none ${flippedClass}" title="點擊翻開 / 蓋上卡片">
             <div class="card-inner relative w-full h-full transform-style-3d">
               
               <!-- 卡片背面 (蓋牌狀態 - 鼠尾草綠休閒風) -->
@@ -409,12 +361,12 @@
               </div>
 
               <!-- 卡片正面 (翻開顯示答案 - 暖白茶韻風) -->
-              <div class="absolute inset-0 w-full h-full bg-white rounded-2xl p-4 flex flex-col justify-between items-center text-stone-700 backface-hidden rotate-y-180 border-2 border-teal-200 shadow-sm overflow-y-auto">
-                <span class="text-xs font-bold bg-teal-50 px-3 py-1 rounded-full text-teal-700 shrink-0">${escapeHtml(name)}</span>
-                <div class="${textSizeClass} font-bold text-stone-700 text-center break-words whitespace-pre-line my-auto py-1">
+              <div class="absolute inset-0 w-full h-full bg-white rounded-2xl p-4 flex flex-col justify-between items-center text-stone-700 backface-hidden rotate-y-180 border-2 border-teal-200 shadow-sm">
+                <span class="text-xs font-bold bg-teal-50 px-3 py-1 rounded-full text-teal-700">${escapeHtml(name)}</span>
+                <div class="text-xl font-bold text-stone-700 text-center break-all my-auto">
                   ${escapeHtml(rawAnswer)}
                 </div>
-                <span class="text-xs font-medium text-stone-400 shrink-0">心有靈犀 ✨</span>
+                <span class="text-xs font-medium text-stone-400">心有靈犀 ✨</span>
               </div>
 
             </div>
@@ -423,24 +375,20 @@
       }).join('');
     }
 
-    // 玩家送出多個答案
+    // 玩家送出答案
     async function submitAnswer() {
-      const inputs = Array.from(document.querySelectorAll('#answerInputsList .answer-input'));
-      const filledAnswers = inputs.map(inp => inp.value.trim()).filter(val => val !== "");
+      const inputEl = document.getElementById('inputAnswer');
+      const answer = inputEl.value.trim();
       const statusText = document.getElementById('submitStatus');
 
-      if (filledAnswers.length === 0) {
-        alert("請至少輸入一個答案！");
+      if (!answer) {
+        alert("請先輸入答案！");
         return;
       }
 
-      const combinedAnswer = filledAnswers.length === 1
-        ? filledAnswers[0]
-        : filledAnswers.map((ans, idx) => `${idx + 1}. ${ans}`).join('\n');
-
-      gameState.answers[gameState.playerName] = combinedAnswer;
+      gameState.answers[gameState.playerName] = answer;
       renderCards();
-      inputs.forEach(inp => inp.value = "");
+      inputEl.value = "";
       statusText.innerText = "傳送答案中...";
 
       try {
@@ -451,7 +399,7 @@
             room: gameState.roomId,
             action: "submit_answer",
             playerName: gameState.playerName,
-            answer: combinedAnswer
+            answer: answer
           })
         });
 
