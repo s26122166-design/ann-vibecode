@@ -16,7 +16,7 @@
       letter-spacing: 0.02em;
     }
     
-    /* 3D 卡片翻轉動畫 (已修正父子層級選擇器) */
+    /* 3D 卡片翻轉動畫 */
     .perspective-1000 {
       perspective: 1000px;
     }
@@ -33,8 +33,7 @@
     .card-inner {
       transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
     }
-    .card-flipped .card-inner,
-    .card-inner.card-flipped {
+    .card-flipped .card-inner {
       transform: rotateY(180deg);
     }
 
@@ -72,9 +71,9 @@
         <span>房號：<span id="displayRoomId" class="text-teal-700">--</span></span>
         <span id="hostBadge" class="hidden bg-teal-600 text-white text-xs px-2.5 py-0.5 rounded-full">房主</span>
       </div>
-      <button onclick="toggleHostConsole()" class="bg-white/85 hover:bg-white backdrop-blur border border-stone-200 px-3.5 py-2 rounded-full font-bold text-stone-600 hover:text-teal-700 shadow-sm transition text-sm flex items-center gap-1" title="開啟房主控制台">
-        <span>👑</span>
-        <span class="hidden sm:inline">控制台</span>
+      <button onclick="toggleHostConsole()" class="bg-white/85 hover:bg-white backdrop-blur border border-stone-200 px-3.5 py-2 rounded-full font-bold text-stone-600 hover:text-teal-700 shadow-sm transition text-sm flex items-center gap-1" title="更換題目或重置房間">
+        <span>⚙️</span>
+        <span class="hidden sm:inline">換題/重置</span>
       </button>
     </div>
   </header>
@@ -114,43 +113,55 @@
       <div class="w-full bg-white/85 backdrop-blur-md chill-card p-6 border border-stone-200/80 text-center relative">
         <span class="text-xs font-bold text-teal-700 uppercase tracking-widest bg-teal-50 border border-teal-200/70 px-3.5 py-1 rounded-full">Current Topic</span>
         <h2 id="questionTitle" class="text-2xl md:text-3xl font-bold text-stone-700 mt-3 min-h-[40px] flex items-center justify-center">
-          等待房主出題中...
+          你喜歡喝什麼？
         </h2>
       </div>
 
-      <!-- 玩家填答輸入區 (當狀態為 playing 時開放) -->
-      <div id="answerSection" class="w-full max-w-md bg-white/85 backdrop-blur-md chill-card p-6 border border-stone-200/80 text-center hidden">
-        <h3 class="text-lg font-bold text-stone-600 mb-3">寫下你的直覺答案 💭</h3>
-        <div class="flex gap-2">
-          <input type="text" id="inputAnswer" onkeydown="if(event.key==='Enter') submitAnswer()" placeholder="輸入答案..." class="w-full px-5 py-3 rounded-2xl border border-stone-200 focus:border-teal-500 focus:outline-none text-stone-700 bg-[#FAF7F2]/80 font-medium">
-          <button onclick="submitAnswer()" class="px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-2xl transition shadow-sm whitespace-nowrap active:scale-95">
-            送出
+      <!-- 玩家多欄位填答輸入區 + 翻牌看答案按鈕 -->
+      <div id="answerSection" class="w-full max-w-lg bg-white/85 backdrop-blur-md chill-card p-6 border border-stone-200/80 text-center">
+        <div class="flex items-center justify-between mb-3 px-1">
+          <h3 class="text-lg font-bold text-stone-600">寫下你的答案 💭</h3>
+          <button type="button" onclick="addAnswerField()" class="text-xs font-bold text-teal-700 bg-teal-50 hover:bg-teal-100 border border-teal-200/80 px-3 py-1.5 rounded-full transition active:scale-95">
+            + 新增答案欄位
           </button>
         </div>
-        <p id="submitStatus" class="text-xs font-bold text-teal-600 mt-2 h-4"></p>
+        
+        <!-- 多個答案輸入框容器 -->
+        <div id="answerInputsList" class="space-y-2.5 text-left">
+          <div class="answer-input-row flex items-center gap-2">
+            <span class="text-xs font-bold text-teal-700 bg-teal-50 border border-teal-200/70 px-2.5 py-2 rounded-xl whitespace-nowrap">答案 1</span>
+            <input type="text" onkeydown="if(event.key==='Enter') submitAnswer()" placeholder="輸入第 1 個答案..." class="answer-input w-full px-4 py-2.5 rounded-2xl border border-stone-200 focus:border-teal-500 focus:outline-none text-stone-700 bg-[#FAF7F2]/80 font-medium transition">
+          </div>
+
+          <div class="answer-input-row flex items-center gap-2">
+            <span class="text-xs font-bold text-teal-700 bg-teal-50 border border-teal-200/70 px-2.5 py-2 rounded-xl whitespace-nowrap">答案 2</span>
+            <input type="text" onkeydown="if(event.key==='Enter') submitAnswer()" placeholder="輸入第 2 個答案..." class="answer-input w-full px-4 py-2.5 rounded-2xl border border-stone-200 focus:border-teal-500 focus:outline-none text-stone-700 bg-[#FAF7F2]/80 font-medium transition">
+            <button type="button" onclick="removeAnswerField(this)" class="px-2.5 py-2 text-stone-400 hover:text-rose-500 font-bold rounded-xl transition" title="刪除此欄位">✕</button>
+          </div>
+        </div>
+
+        <!-- 送出答案與翻牌看答案按鈕區 -->
+        <div class="mt-4 pt-4 border-t border-stone-200/80 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <button onclick="submitAnswer()" class="w-full sm:flex-1 py-3 px-6 bg-teal-600 hover:bg-teal-700 text-white font-bold text-base rounded-2xl transition shadow-sm whitespace-nowrap active:scale-95">
+            送出答案 ✨
+          </button>
+
+          <button id="btnFlipAnswers" onclick="toggleFlipAllAnswers()" class="w-full sm:flex-1 py-3 px-6 rounded-2xl text-base font-bold bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-white shadow-md transition transform active:scale-95 flex items-center justify-center gap-2">
+            <span>🃏</span>
+            <span>翻牌看答案</span>
+          </button>
+        </div>
+
+        <p id="submitStatus" class="text-xs font-bold text-teal-600 mt-2.5 min-h-[16px]"></p>
       </div>
 
-      <!-- 玩家卡片展出區 (支援點擊單張翻面 + 一鍵解鎖看全部答案 + 同步開牌) -->
+      <!-- 玩家卡片展出區 -->
       <div class="w-full">
-        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 mb-4 px-1">
-          <div class="flex items-center gap-2">
-            <h3 class="text-lg font-bold text-stone-600 flex items-center gap-2">
-              <span>🌿</span> 玩家心電卡片 <span>🌿</span>
-            </h3>
-            <span class="text-xs text-stone-400 font-medium">(點擊卡片可單獨翻面)</span>
-          </div>
-
-          <!-- 看答案控制按鈕群組 -->
-          <div class="flex items-center gap-2">
-            <button id="btnUnlockPeek" onclick="togglePeekAll()" class="px-4 py-2 rounded-full text-sm font-bold bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-200 shadow-sm transition active:scale-95 flex items-center gap-1.5">
-              <span>👁️</span>
-              <span>偷看答案</span>
-            </button>
-            <button onclick="hostRevealDirect()" class="px-4 py-2 rounded-full text-sm font-bold bg-teal-600 hover:bg-teal-700 text-white shadow-sm transition active:scale-95 flex items-center gap-1.5">
-              <span>✨</span>
-              <span>全場同步開牌</span>
-            </button>
-          </div>
+        <div class="flex items-center justify-center gap-2 mb-4">
+          <h3 class="text-lg font-bold text-stone-600 flex items-center gap-2">
+            <span>🌿</span> 玩家心電卡片 <span>🌿</span>
+          </h3>
+          <span class="text-xs text-stone-400 font-medium">(也可點擊單張卡片翻面)</span>
         </div>
 
         <div id="cardsGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
@@ -162,28 +173,27 @@
 
   </main>
 
-  <!-- 頁尾與隱藏控制台按鈕 -->
+  <!-- 頁尾與控制台按鈕 -->
   <footer class="p-4 text-center text-stone-400 text-sm font-medium flex justify-between items-center max-w-4xl mx-auto w-full">
     <span>🌿 Cloud Telepathy Game</span>
-    <!-- 房主控制台按鈕 -->
-    <button onclick="toggleHostConsole()" class="opacity-50 hover:opacity-100 transition-opacity text-xl p-2" title="開啟房主控制台">
+    <button onclick="toggleHostConsole()" class="opacity-50 hover:opacity-100 transition-opacity text-xl p-2" title="更換題目或重置房間">
       🪴
     </button>
   </footer>
 
-  <!-- 房主控制台 Modal -->
+  <!-- 房主換題/重置控制台 Modal -->
   <div id="hostModal" class="hidden fixed inset-0 bg-stone-900/35 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="bg-[#FAF7F2] chill-card border border-stone-200 p-6 w-full max-w-lg shadow-xl relative">
       <button onclick="toggleHostConsole()" class="absolute top-4 right-4 text-stone-400 hover:text-stone-600 font-bold text-xl">✕</button>
       
       <div class="flex items-center gap-2 mb-4">
         <span class="text-2xl">🎧</span>
-        <h3 class="text-xl font-bold text-stone-700">房主休閒控制台</h3>
+        <h3 class="text-xl font-bold text-stone-700">房間設定控制台</h3>
       </div>
 
       <div class="space-y-4">
         <div>
-          <label class="block text-sm font-bold text-stone-500 mb-1.5">設定新題目</label>
+          <label class="block text-sm font-bold text-stone-500 mb-1.5">更換新題目</label>
           <div class="flex gap-2">
             <input type="text" id="hostQuestionInput" onkeydown="if(event.key==='Enter') hostSetQuestion()" placeholder="例如：你喜歡喝什麼？" class="w-full px-4 py-2.5 rounded-xl border border-stone-200 bg-white focus:border-teal-500 focus:outline-none text-stone-700">
             <button onclick="hostSetQuestion()" class="px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl transition whitespace-nowrap">
@@ -196,7 +206,7 @@
 
         <div class="flex gap-3">
           <button onclick="hostReveal()" class="flex-1 py-3 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-bold rounded-xl shadow-sm transition transform active:scale-95 flex items-center justify-center gap-2">
-            <span>✨</span> 全網頁同步翻牌！
+            <span>✨</span> 全網頁同步翻牌
           </button>
           <button onclick="hostReset()" class="px-4 py-3 bg-stone-200 hover:bg-stone-300 text-stone-600 font-bold rounded-xl transition">
             重置房間
@@ -210,16 +220,18 @@
     // === 核心變數設定 ===
     const SHEET_NAME = 'TelepathyData';
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyf0rHPnWr18cFk-n-aWFGI9cTJ5cuQQNygBDBeCJ5BjX8n1cmK_fU_ycEvAms5xShEeA/exec";
+    const DEFAULT_QUESTION = "你喜歡喝什麼？";
 
     let gameState = {
       roomId: "default",
       playerName: "",
       isHost: false,
-      status: "setup", // setup, playing, revealed
-      question: "",
+      status: "setup",
+      question: DEFAULT_QUESTION,
       answers: {},
-      localPeekAll: false,      // 本地一鍵偷看全部答案
-      localPeekedCards: {}      // 記錄單張點擊翻開的玩家卡片
+      allFlipped: false,
+      singleCardFlips: {},
+      lastServerStatus: "setup"
     };
 
     let pollingTimer = null;
@@ -228,6 +240,35 @@
     function generateRandomRoom() {
       const roomNum = Math.floor(1000 + Math.random() * 9000).toString();
       document.getElementById('inputRoomId').value = roomNum;
+    }
+
+    // 新增答案輸入欄位
+    function addAnswerField() {
+      const container = document.getElementById('answerInputsList');
+      const count = container.querySelectorAll('.answer-input-row').length + 1;
+      const row = document.createElement('div');
+      row.className = 'answer-input-row flex items-center gap-2';
+      row.innerHTML = `
+        <span class="text-xs font-bold text-teal-700 bg-teal-50 border border-teal-200/70 px-2.5 py-2 rounded-xl whitespace-nowrap">答案 ${count}</span>
+        <input type="text" onkeydown="if(event.key==='Enter') submitAnswer()" placeholder="輸入第 ${count} 個答案..." class="answer-input w-full px-4 py-2.5 rounded-2xl border border-stone-200 focus:border-teal-500 focus:outline-none text-stone-700 bg-[#FAF7F2]/80 font-medium transition">
+        <button type="button" onclick="removeAnswerField(this)" class="px-2.5 py-2 text-stone-400 hover:text-rose-500 font-bold rounded-xl transition" title="刪除此欄位">✕</button>
+      `;
+      container.appendChild(row);
+      row.querySelector('input').focus();
+    }
+
+    // 刪除多餘的答案輸入欄位
+    function removeAnswerField(btn) {
+      const container = document.getElementById('answerInputsList');
+      const rows = container.querySelectorAll('.answer-input-row');
+      if (rows.length <= 1) return;
+      btn.closest('.answer-input-row').remove();
+
+      container.querySelectorAll('.answer-input-row').forEach((row, idx) => {
+        const num = idx + 1;
+        row.querySelector('span').innerText = `答案 ${num}`;
+        row.querySelector('input').placeholder = `輸入第 ${num} 個答案...`;
+      });
     }
 
     // 登入進入指定房間
@@ -243,13 +284,11 @@
       gameState.playerName = name;
       gameState.roomId = room;
 
-      // 切換畫面
       document.getElementById('viewLogin').classList.add('hidden');
       document.getElementById('viewGame').classList.remove('hidden');
       document.getElementById('roomBadge').classList.remove('hidden');
       document.getElementById('displayRoomId').innerText = gameState.roomId;
 
-      // 啟動輪詢機制 (每 2 秒向後端抓取狀態)
       startPolling();
     }
 
@@ -264,7 +303,6 @@
       try {
         const response = await fetch(`${GAS_API_URL}?room=${encodeURIComponent(gameState.roomId)}`);
         const data = await response.json();
-
         updateUI(data);
       } catch (error) {
         console.error("輪詢資料抓取失敗:", error);
@@ -274,75 +312,71 @@
     // 更新前端 UI 狀態
     function updateUI(data) {
       const newStatus = data.status || "setup";
-      const newQuestion = data.question || "";
+      const newQuestion = (data.question && data.question.trim()) ? data.question.trim() : DEFAULT_QUESTION;
 
-      // 當重置房間或更換新題目時，自動將本地偷看狀態歸零
-      if (newStatus === "setup" || (newQuestion !== gameState.question && newStatus !== "revealed")) {
-        gameState.localPeekAll = false;
-        gameState.localPeekedCards = {};
+      if (newStatus === "revealed" && gameState.lastServerStatus !== "revealed") {
+        gameState.allFlipped = true;
+        gameState.singleCardFlips = {};
+      }
+      if (newStatus === "setup" && gameState.lastServerStatus !== "setup") {
+        gameState.allFlipped = false;
+        gameState.singleCardFlips = {};
       }
 
+      gameState.lastServerStatus = newStatus;
       gameState.status = newStatus;
       gameState.question = newQuestion;
-      gameState.answers = data.answers || {};
 
-      // 更新題目
-      document.getElementById('questionTitle').innerText = gameState.question || "等待房主出題中...";
-
-      // 控制填答輸入框
-      const answerSection = document.getElementById('answerSection');
-      if (gameState.status === 'playing') {
-        answerSection.classList.remove('hidden');
-      } else {
-        answerSection.classList.add('hidden');
+      const serverAnswers = data.answers || {};
+      gameState.answers = { ...gameState.answers, ...serverAnswers };
+      if (Object.keys(serverAnswers).length === 0 && newStatus === "setup" && data.answers) {
+        gameState.answers = {};
       }
 
-      // 更新解鎖按鈕狀態與卡片
-      updatePeekButtonUI();
+      document.getElementById('questionTitle').innerText = gameState.question;
+
+      updateFlipButtonUI();
       renderCards();
     }
 
-    // 切換「一鍵偷看全部答案」
-    function togglePeekAll() {
-      if (gameState.status === 'revealed') return;
-      gameState.localPeekAll = !gameState.localPeekAll;
-      if (!gameState.localPeekAll) {
-        gameState.localPeekedCards = {};
+    // 點擊「翻牌看答案 / 蓋上卡片」主按鈕
+    function toggleFlipAllAnswers() {
+      gameState.allFlipped = !gameState.allFlipped;
+      gameState.singleCardFlips = {};
+      updateFlipButtonUI();
+      renderCards();
+
+      if (gameState.allFlipped && gameState.status !== "revealed") {
+        sendHostAction({ action: "reveal" });
       }
-      updatePeekButtonUI();
+    }
+
+    // 點擊單張卡片個別翻面
+    function toggleSingleCard(playerName) {
+      const currentFlipped = isCardFlipped(playerName);
+      gameState.singleCardFlips[playerName] = !currentFlipped;
       renderCards();
     }
 
-    // 切換「點擊單張卡片翻面」
-    function toggleCardPeek(playerName) {
-      if (gameState.status === 'revealed') return;
-
-      if (gameState.localPeekAll) {
-        gameState.localPeekAll = false;
-        Object.keys(gameState.answers).forEach(p => {
-          gameState.localPeekedCards[p] = (p !== playerName);
-        });
-      } else {
-        gameState.localPeekedCards[playerName] = !gameState.localPeekedCards[playerName];
+    // 判斷某張卡片目前是否為翻開狀態
+    function isCardFlipped(playerName) {
+      if (Object.prototype.hasOwnProperty.call(gameState.singleCardFlips, playerName)) {
+        return gameState.singleCardFlips[playerName];
       }
-      updatePeekButtonUI();
-      renderCards();
+      return gameState.allFlipped;
     }
 
-    // 更新「偷看答案」按鈕視覺
-    function updatePeekButtonUI() {
-      const btn = document.getElementById('btnUnlockPeek');
+    // 更新「翻牌看答案」按鈕文字與顏色
+    function updateFlipButtonUI() {
+      const btn = document.getElementById('btnFlipAnswers');
       if (!btn) return;
 
-      if (gameState.status === 'revealed') {
-        btn.innerHTML = `<span>🔓</span><span>已全場開牌</span>`;
-        btn.className = "px-4 py-2 rounded-full text-sm font-bold bg-teal-100 text-teal-800 border border-teal-200 cursor-default flex items-center gap-1.5";
-      } else if (gameState.localPeekAll) {
-        btn.innerHTML = `<span>🙈</span><span>蓋上答案</span>`;
-        btn.className = "px-4 py-2 rounded-full text-sm font-bold bg-amber-500 hover:bg-amber-600 text-white border border-amber-500 shadow-sm transition active:scale-95 flex items-center gap-1.5";
+      if (gameState.allFlipped) {
+        btn.innerHTML = `<span>🙈</span><span>蓋上卡片</span>`;
+        btn.className = "w-full sm:flex-1 py-3 px-6 rounded-2xl text-base font-bold bg-stone-600 hover:bg-stone-700 text-white shadow-md transition transform active:scale-95 flex items-center justify-center gap-2";
       } else {
-        btn.innerHTML = `<span>👁️</span><span>偷看答案</span>`;
-        btn.className = "px-4 py-2 rounded-full text-sm font-bold bg-amber-100 hover:bg-amber-200 text-amber-800 border border-amber-200 shadow-sm transition active:scale-95 flex items-center gap-1.5";
+        btn.innerHTML = `<span>🃏</span><span>翻牌看答案</span>`;
+        btn.className = "w-full sm:flex-1 py-3 px-6 rounded-2xl text-base font-bold bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-white shadow-md transition transform active:scale-95 flex items-center justify-center gap-2";
       }
     }
 
@@ -352,42 +386,35 @@
       const playerNames = Object.keys(gameState.answers);
 
       if (playerNames.length === 0) {
-        grid.innerHTML = `<p class="col-span-full text-center text-stone-400 py-8 font-medium">還沒有玩家送出答案喔，慢慢想～ ☕</p>`;
+        grid.innerHTML = `<p class="col-span-full text-center text-stone-400 py-8 font-medium">還沒有人送出答案喔，在上方輸入答案後就能翻牌查看 ☕</p>`;
         return;
       }
 
-      // 判斷是否觸發開牌（全場開牌 OR 個人偷看全部 OR 個人點擊單張）
-      const isGlobalRevealed = gameState.status === 'revealed';
-
       grid.innerHTML = playerNames.map(name => {
         const rawAnswer = gameState.answers[name];
-        const isFlipped = isGlobalRevealed || gameState.localPeekAll || !!gameState.localPeekedCards[name];
-        const flippedClass = isFlipped ? 'card-flipped' : '';
-
-        // 若後端在未開牌前有加密回傳 (如 true 或 ***)，給予清楚提示
-        const isMaskedByBackend = (rawAnswer === true || rawAnswer === '***' || rawAnswer === '[隱藏]');
-        const displayAnswer = isMaskedByBackend
-          ? `<span class="text-xs text-amber-700 font-medium">後端加密中<br>請按「全場同步開牌」</span>`
-          : escapeHtml(rawAnswer);
+        const flipped = isCardFlipped(name);
+        const flippedClass = flipped ? 'card-flipped' : '';
+        const isMultiLine = String(rawAnswer).includes('\n');
+        const textSizeClass = isMultiLine ? 'text-base leading-snug' : 'text-xl';
 
         return `
-          <div data-player="${escapeHtml(name)}" onclick="toggleCardPeek(this.dataset.player)" class="perspective-1000 w-full h-40 cursor-pointer select-none ${flippedClass}" title="點擊翻開 / 蓋上卡片">
+          <div data-player="${escapeHtml(name)}" onclick="toggleSingleCard(this.dataset.player)" class="perspective-1000 w-full h-44 cursor-pointer select-none ${flippedClass}" title="點擊翻開 / 蓋上卡片">
             <div class="card-inner relative w-full h-full transform-style-3d">
               
-              <!-- 卡片背面 (隱藏答案 - 鼠尾草綠休閒風) -->
+              <!-- 卡片背面 (蓋牌狀態 - 鼠尾草綠休閒風) -->
               <div class="absolute inset-0 w-full h-full bg-gradient-to-br from-[#7FA695] to-[#5E8675] rounded-2xl p-4 flex flex-col justify-between items-center text-white backface-hidden border border-white/60 shadow-sm hover:brightness-105 transition">
                 <span class="text-xs font-bold bg-white/20 px-3 py-1 rounded-full">${escapeHtml(name)}</span>
                 <div class="text-3xl">🎲</div>
-                <span class="text-xs font-medium opacity-90">點擊翻開 👁️</span>
+                <span class="text-xs font-medium opacity-90">點擊翻開看答案</span>
               </div>
 
-              <!-- 卡片正面 (翻牌顯現 - 暖白茶韻風) -->
-              <div class="absolute inset-0 w-full h-full bg-white rounded-2xl p-4 flex flex-col justify-between items-center text-stone-700 backface-hidden rotate-y-180 border-2 border-teal-200 shadow-sm">
-                <span class="text-xs font-bold bg-teal-50 px-3 py-1 rounded-full text-teal-700">${escapeHtml(name)}</span>
-                <div class="text-xl font-bold text-stone-700 text-center break-all my-auto">
-                  ${displayAnswer}
+              <!-- 卡片正面 (翻開顯示答案 - 暖白茶韻風) -->
+              <div class="absolute inset-0 w-full h-full bg-white rounded-2xl p-4 flex flex-col justify-between items-center text-stone-700 backface-hidden rotate-y-180 border-2 border-teal-200 shadow-sm overflow-y-auto">
+                <span class="text-xs font-bold bg-teal-50 px-3 py-1 rounded-full text-teal-700 shrink-0">${escapeHtml(name)}</span>
+                <div class="${textSizeClass} font-bold text-stone-700 text-center break-words whitespace-pre-line my-auto py-1">
+                  ${escapeHtml(rawAnswer)}
                 </div>
-                <span class="text-xs font-medium text-stone-400">心有靈犀 ✨</span>
+                <span class="text-xs font-medium text-stone-400 shrink-0">心有靈犀 ✨</span>
               </div>
 
             </div>
@@ -396,17 +423,25 @@
       }).join('');
     }
 
-    // 玩家送出答案
+    // 玩家送出多個答案
     async function submitAnswer() {
-      const answer = document.getElementById('inputAnswer').value.trim();
+      const inputs = Array.from(document.querySelectorAll('#answerInputsList .answer-input'));
+      const filledAnswers = inputs.map(inp => inp.value.trim()).filter(val => val !== "");
       const statusText = document.getElementById('submitStatus');
 
-      if (!answer) {
-        alert("請輸入答案！");
+      if (filledAnswers.length === 0) {
+        alert("請至少輸入一個答案！");
         return;
       }
 
-      statusText.innerText = "傳送心電中...";
+      const combinedAnswer = filledAnswers.length === 1
+        ? filledAnswers[0]
+        : filledAnswers.map((ans, idx) => `${idx + 1}. ${ans}`).join('\n');
+
+      gameState.answers[gameState.playerName] = combinedAnswer;
+      renderCards();
+      inputs.forEach(inp => inp.value = "");
+      statusText.innerText = "傳送答案中...";
 
       try {
         await fetch(GAS_API_URL, {
@@ -416,16 +451,15 @@
             room: gameState.roomId,
             action: "submit_answer",
             playerName: gameState.playerName,
-            answer: answer
+            answer: combinedAnswer
           })
         });
 
-        statusText.innerText = "答案已送出！稍待翻牌 ☕";
-        document.getElementById('inputAnswer').value = "";
-        fetchGameState(); // 提交後手動刷新
+        statusText.innerText = "答案已送出！點擊「翻牌看答案」即可查看 ☕";
+        fetchGameState();
       } catch (error) {
         console.error("提交答案失敗:", error);
-        statusText.innerText = "傳送失敗，請重試！";
+        statusText.innerText = "已暫存於畫面，雲端同步稍有延遲";
       }
     }
 
@@ -445,6 +479,13 @@
       const q = document.getElementById('hostQuestionInput').value.trim();
       if (!q) return alert("請輸入題目！");
 
+      gameState.question = q;
+      gameState.allFlipped = false;
+      gameState.singleCardFlips = {};
+      document.getElementById('questionTitle').innerText = q;
+      updateFlipButtonUI();
+      renderCards();
+
       await sendHostAction({
         action: "set_question",
         question: q
@@ -454,20 +495,26 @@
       toggleHostConsole();
     }
 
-    // 同步開牌 (從控制台觸發)
+    // 同步開牌
     async function hostReveal() {
+      gameState.allFlipped = true;
+      gameState.singleCardFlips = {};
+      updateFlipButtonUI();
+      renderCards();
+
       await sendHostAction({ action: "reveal" });
       toggleHostConsole();
-    }
-
-    // 同步開牌 (從主畫面按鈕直接觸發)
-    async function hostRevealDirect() {
-      await sendHostAction({ action: "reveal" });
     }
 
     // 重置房間狀態
     async function hostReset() {
       if (confirm("確定要重置目前房間嗎？")) {
+        gameState.answers = {};
+        gameState.allFlipped = false;
+        gameState.singleCardFlips = {};
+        updateFlipButtonUI();
+        renderCards();
+
         await sendHostAction({ action: "reset" });
         toggleHostConsole();
       }
